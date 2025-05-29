@@ -1,0 +1,31 @@
+---
+title: "Mrunmayee Inamke"
+image: "C:/Users/mrun7/OneDrive/Pictures/inamke.png"
+about:
+    template: jolla
+    links: 
+        - icon: envelope
+          href: mailto:minamke@ucsd.edu
+        - icon: linkedin
+          href: https://www.linkedin.com/in/mrunmayee-inamke/
+---
+
+Here is a paragraph about me- 
+I am a passionate Business Analytics professional with a strong technical background in Computer Science and a focus on delivering actionable insights through data. Currently pursuing my Master of Science in Business Analytics at UCSD's Rady School of Management, I thrive on creating data-driven solutions that solve real business problems.
+
+🔹 Data-Driven Decision Making
+Leveraged advanced analytics tools (Python, R, SQL) to drive investment decision-making and reduce error rates by 80% at Morningstar Pvt. Ltd.. Developed automated workflows to improve process efficiency by 75%, reducing manual efforts significantly.
+
+🔹 End-to-End Data Solutions
+At Infosys, I played a key role in orchestrating end-to-end pipeline development for B2B procurement solutions used by 1,000+ clients. Collaborated with cross-functional teams to build machine learning models that reduced forecast error by 20%.
+
+🔹 Insightful Dashboards & Reporting
+Designed powerful Power BI dashboards with DAX calculations to support informed decision-making, resulting in a 10% time reduction for business operations. My ability to create clear, data-driven visualizations has enabled teams to optimize performance.
+
+🔹 Hands-On Technical Expertise
+Skilled in Python, SQL, AWS, Power BI, Tableau, ETL, and cloud platforms (AWS, GCP, Azure), I’m proficient in crafting tailored data solutions that align with business goals.
+
+🔹 Proven Results in Data Science
+Developed a collaborative filtering and content-based recommendation system using Amazon Reviews with 89% accuracy, showcasing my deep understanding of machine learning algorithms like KNN, SVD, and ALS.
+
+Let’s connect! I’m always looking for opportunities to combine my passion for data and business to drive impactful results. Whether you're in business operations, data analytics, or tech, I’d love to chat about how we can collaborate.
