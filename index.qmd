@@ -1,6 +1,6 @@
 ---
 title: "Mrunmayee Inamke"
-image: "C:/Users/mrun7/OneDrive/Pictures/inamke.png"
+image: "mydocs/profilepic.png"
 about:
     template: jolla
     links: 

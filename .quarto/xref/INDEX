@@ -10,5 +10,11 @@
   },
   "projects/project2/hw2_questions.qmd": {
     "hw2_questions.html": "8617fe97"
+  },
+  "resume.qmd": {
+    "resume.html": "7351ac1a"
+  },
+  "projects.qmd": {
+    "projects.html": "276945dd"
   }
 }

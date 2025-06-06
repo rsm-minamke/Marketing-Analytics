@@ -2,6 +2,6 @@
 title: "About"
 ---
 
-{{< pdf resume/C:\Users\mrun7\OneDrive\Documents\Official\Mrunmayee_Inamke_DA_Resume.pdf width=100% height=800 >}}
+{{< pdf mydocs/resume.pdf width=100% height=800 >}}
 
 

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mrunmayee Inamke">
-<meta name="dcterms.date" content="2025-05-28">
+<meta name="dcterms.date" content="2025-06-05">
 
 <title>Poisson Regression Examples – Mrunmayee’s website</title>
 <style>
@@ -162,7 +162,11 @@ window.Quarto = {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../../resume.html"> 
-<span class="menu-text">About</span></a>
+<span class="menu-text">Resume</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Projects</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -241,7 +245,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 28, 2025</p>
+      <p class="date">June 5, 2025</p>
     </div>
   </div>
   
@@ -268,7 +272,7 @@ window.Quarto = {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="b98f375d" class="cell" data-execution_count="1">
+<div id="a9175d4c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -340,7 +344,7 @@ window.Quarto = {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="f2687326" class="cell" data-execution_count="2">
+<div id="2c225f76" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -374,7 +378,7 @@ window.Quarto = {
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="e0f19d49" class="cell" data-execution_count="3">
+<div id="82ca9d21" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"iscustomer"</span>)[<span class="st">"patents"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -406,7 +410,7 @@ Name: patents, dtype: float64</code></pre>
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="bddf18c1" class="cell" data-execution_count="4">
+<div id="2ce6cf28" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -442,7 +446,7 @@ Name: patents, dtype: float64</code></pre>
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="7584a24c" class="cell" data-execution_count="5">
+<div id="72984332" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Map customer status labels</span></span>
@@ -480,7 +484,7 @@ Name: patents, dtype: float64</code></pre>
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="0374249f" class="cell" data-execution_count="6">
+<div id="df83961d" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"iscustomer"</span>)[<span class="st">"age"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -536,7 +540,7 @@ L(\lambda) = e^{-n\lambda} \cdot \lambda^{\sum_{i=1}^{n} Y_i} \cdot \prod_{i=1}^
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="9fcc097b" class="cell" data-execution_count="7">
+<div id="467ee5a0" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -559,7 +563,7 @@ L(\lambda) = e^{-n\lambda} \cdot \lambda^{\sum_{i=1}^{n} Y_i} \cdot \prod_{i=1}^
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="eb8a51de" class="cell" data-execution_count="8">
+<div id="b5549608" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -643,7 +647,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="fe670bd0" class="cell" data-execution_count="9">
+<div id="487df053" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> optimize</span>
@@ -663,7 +667,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <section id="interpretation" class="level3">
 <h3 class="anchored" data-anchor-id="interpretation">Interpretation</h3>
 <p>The maximum likelihood estimate (MLE) of ( ) is approximately equal to the sample mean of the number of patents, which is expected for a Poisson distribution.</p>
-<div id="1f2e24f3" class="cell" data-execution_count="10">
+<div id="1563a0bc" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare with the sample mean</span></span>
@@ -683,7 +687,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="16839ede" class="cell" data-execution_count="11">
+<div id="f388ebc2" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -708,7 +712,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="d4c5f8f6" class="cell" data-execution_count="12">
+<div id="acf03827" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -832,7 +836,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-body-container">
-<div id="8fd9d4b8" class="cell" data-execution_count="13">
+<div id="2c2b1bdd" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
@@ -936,7 +940,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <li><code>X_1</code>: All firms set to <strong>customer</strong> (<code>iscustomer = 1</code>)</li>
 </ul>
 <p>Then we compare the predicted number of patents for each firm under the two scenarios using the fitted model.</p>
-<div id="bc587550" class="cell" data-execution_count="14">
+<div id="4adf77ef" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make two versions of X_glm:</span></span>
@@ -960,7 +964,7 @@ f(Y_i \mid \lambda) = \frac{e^{-\lambda} \lambda^{Y_i}}{Y_i!}
 <section id="interpretation-2" class="level3">
 <h3 class="anchored" data-anchor-id="interpretation-2">Interpretation</h3>
 <p>The average difference in predicted number of patents between Blueprinty customers and non-customers is:</p>
-<div id="27babbc4" class="cell" data-execution_count="15">
+<div id="a96c45ef" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Estimated average increase in patent count from using Blueprinty: </span><span class="sc">{</span>average_effect<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1012,7 +1016,7 @@ Variable Definitions
 </section>
 <section id="drop-rows-with-missing-data" class="level3">
 <h3 class="anchored" data-anchor-id="drop-rows-with-missing-data">Drop Rows with Missing Data</h3>
-<div id="6c4b722b" class="cell" data-execution_count="16">
+<div id="fd431653" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -1030,7 +1034,7 @@ Variable Definitions
 </section>
 <section id="distribution-of-number-of-reviews" class="level3">
 <h3 class="anchored" data-anchor-id="distribution-of-number-of-reviews">Distribution of Number of Reviews</h3>
-<div id="1a492c5c" class="cell" data-execution_count="17">
+<div id="f78b5066" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1064,7 +1068,7 @@ Variable Definitions
 </section>
 <section id="average-number-of-reviews-by-room-type" class="level3">
 <h3 class="anchored" data-anchor-id="average-number-of-reviews-by-room-type">Average Number of Reviews by Room Type</h3>
-<div id="0712df85" class="cell" data-execution_count="18">
+<div id="352f5914" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1108,7 +1112,7 @@ Variable Definitions
 </section>
 <section id="average-number-of-reviews-by-instant-bookability" class="level3">
 <h3 class="anchored" data-anchor-id="average-number-of-reviews-by-instant-bookability">Average Number of Reviews by Instant Bookability</h3>
-<div id="06e5affb" class="cell" data-execution_count="19">
+<div id="4f0b9ad5" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1149,7 +1153,7 @@ Variable Definitions
 </section>
 <section id="correlation-with-numeric-predictors" class="level3">
 <h3 class="anchored" data-anchor-id="correlation-with-numeric-predictors">Correlation with Numeric Predictors</h3>
-<div id="a79a4210" class="cell" data-execution_count="20">
+<div id="64d8aa2a" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -1190,7 +1194,7 @@ Variable Definitions
 <section id="poisson-regression-model-using-statsmodels.glm" class="level3">
 <h3 class="anchored" data-anchor-id="poisson-regression-model-using-statsmodels.glm">Poisson Regression Model Using <code>statsmodels.GLM()</code></h3>
 <p>We model the number of reviews (as a proxy for bookings) using a Poisson regression with the following predictors: - <code>room_type</code> (categorical) - <code>instant_bookable</code> (binary) - <code>price</code>, <code>days</code>, <code>bathrooms</code>, <code>bedrooms</code> - Review scores: <code>cleanliness</code>, <code>location</code>, <code>value</code></p>
-<div id="cae9431a" class="cell" data-execution_count="21">
+<div id="0dda9e9f" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
