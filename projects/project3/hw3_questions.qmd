@@ -47,19 +47,51 @@ $$ \ell_n(\beta) = \sum_{i=1}^n \sum_{j=1}^J \delta_{ij} \log(\mathbb{P}_i(j)) $
 
 ## 2. Simulate Conjoint Data
 
-We will simulate data from a conjoint experiment about video content streaming services. We elect to simulate 100 respondents, each completing 10 choice tasks, where they choose from three alternatives per task. For simplicity, there is not a "no choice" option; each simulated respondent must select one of the 3 alternatives. 
+## Conjoint Simulation: Streaming Service Preferences
 
-Each alternative is a hypothetical streaming offer consistent of three attributes: (1) brand is either Netflix, Amazon Prime, or Hulu; (2) ads can either be part of the experience, or it can be ad-free, and (3) price per month ranges from \$4 to \$32 in increments of \$4.
+We simulate data from a **conjoint experiment** focused on video content streaming services. The setup includes:
 
-The part-worths (ie, preference weights or beta parameters) for the attribute levels will be 1.0 for Netflix, 0.5 for Amazon Prime (with 0 for Hulu as the reference brand); -0.8 for included adverstisements (0 for ad-free); and -0.1*price so that utility to consumer $i$ for hypothethical streaming service $j$ is 
+- **100 respondents**,  
+- Each completing **10 choice tasks**,  
+- With **3 alternatives per task** (no “none” option — a choice is always made).
 
-$$
-u_{ij} = (1 \times Netflix_j) + (0.5 \times Prime_j) + (-0.8*Ads_j) - 0.1\times Price_j + \varepsilon_{ij}
-$$
+---
 
-where the variables are binary indicators and $\varepsilon$ is Type 1 Extreme Value (ie, Gumble) distributed.
+### Attribute Design
 
-The following code provides the simulation of the conjoint data.
+Each alternative represents a hypothetical streaming offer characterized by three attributes:
+
+1. **Brand**: Netflix, Amazon Prime, or Hulu (Hulu as the reference level)  
+2. **Ad Experience**: With ads or ad-free  
+3. **Price**: Ranging from \$4 to \$32, in \$4 increments
+
+---
+
+### Part-Worth Utilities (Preference Weights)
+
+The simulated utility \( u_{ij} \) for respondent *i* choosing option *j* is modeled as:
+
+\[
+u_{ij} = (1.0 \times \text{Netflix}_j) + (0.5 \times \text{Prime}_j) + (-0.8 \times \text{Ads}_j) + (-0.1 \times \text{Price}_j) + \varepsilon_{ij}
+\]
+
+Where:
+
+- Brand indicators: Netflix and Amazon Prime (Hulu = reference)  
+- Ads: 1 if ads are included, 0 if ad-free  
+- Price: Monthly cost in dollars  
+- \(\varepsilon_{ij}\): Random error term drawn from a **Type I Extreme Value** (Gumbel) distribution
+
+This model reflects that respondents prefer:
+- **Netflix most**, followed by **Prime**, and **Hulu least**
+- **Ad-free experiences**, and
+- **Lower prices**
+
+---
+
+### Data Generation
+
+The following code simulates the full dataset based on this model, generating realistic respondent choices for use in discrete choice modeling or estimation.
 
 
 ```{python}
@@ -124,11 +156,32 @@ conjoint_data.head()
 
 ```
 
-The output shows the first few rows of simulated conjoint data, where each row represents one product alternative shown to a respondent in a choice task. Key attributes include brand, ad presence, and price. Only one row per task has `choice = 1`, indicating the selected option based on utility.
+The output displays the **first few rows** of the simulated conjoint dataset. Each row corresponds to a **single product alternative** presented to a respondent in a choice task.
+
+Key variables include:
+- `brand`: Streaming service brand (Netflix, Prime, or Hulu)
+- `ad`: Whether the alternative includes ads
+- `price`: Monthly subscription price
+- `choice`: Equals `1` only for the **chosen alternative** in each task, based on calculated utility
+
+Only **one row per task** will have `choice = 1`, reflecting the respondent’s selection among the three options.
+
+---
 
 ## 3. Preparing the Data for Estimation
 
-The "hard part" of the MNL likelihood function is organizing the data, as we need to keep track of 3 dimensions (consumer $i$, covariate $k$, and product $j$) instead of the typical 2 dimensions for cross-sectional regression models (consumer $i$ and covariate $k$). The fact that each task for each respondent has the same number of alternatives (3) helps.  In addition, we need to convert the categorical variables for brand and ads into binary variables.
+Before estimating the **Multinomial Logit (MNL)** model, we must properly structure the dataset.
+
+Unlike standard cross-sectional regressions with just two dimensions (consumer *i*, covariate *k*), MNL models require tracking three:  
+- **Respondent** (*i*)  
+- **Alternative** (*j*)  
+- **Attribute/Covariate** (*k*)
+
+Fortunately, each choice task involves exactly **three alternatives**, simplifying this structure.
+
+Additionally, we must:
+- **One-hot encode categorical variables** such as `brand` (with Hulu as the reference) and `ads` (ad-free as the base),  
+- Ensure that all variables are formatted as **numeric inputs** for the estimation procedure.
 
 #### Reshaping and Prepping the Data
 
@@ -139,7 +192,6 @@ The "hard part" of the MNL likelihood function is organizing the data, as we nee
 import sklearn
 from sklearn.preprocessing import OneHotEncoder
 
-
 # Step 1: Encode categorical variables
 categorical_cols = ['brand', 'ad']
 encoder = OneHotEncoder(drop='first')  # no 'sparse' arg
@@ -149,7 +201,7 @@ encoded = encoder.fit_transform(conjoint_data[categorical_cols]).toarray()
 X = np.hstack([encoded, conjoint_data[['price']].values])
 
 # Step 3: Store structured data for estimation
-mnl_data = {
+mnl_prep_data = {
     'X': X,
     'y': conjoint_data['choice'].values,
     'id': conjoint_data['resp'].values,
@@ -157,12 +209,12 @@ mnl_data = {
 }
 
 # Check dimensions
-print(f"X shape: {mnl_data['X'].shape}")
-print(f"y shape: {mnl_data['y'].shape}")
+print(f"X shape: {mnl_prep_data['X'].shape}")
+print(f"y shape: {mnl_prep_data['y'].shape}")
 
 # # Preview reshaped X as a DataFrame
 feature_names = encoder.get_feature_names_out(categorical_cols).tolist() + ['price']
-X_df = pd.DataFrame(mnl_data['X'], columns=feature_names)
+X_df = pd.DataFrame(mnl_prep_data['X'], columns=feature_names)
 print(X_df.head())
 
 
@@ -171,9 +223,22 @@ print(X_df.head())
 
 ## 4. Estimation via Maximum Likelihood
 
-#### The log-likelihood function
+### Log-Likelihood Function
 
-To obtain the estimated coefficients of the Multinomial Logit (MNL) model, a log-likelihood function is defined based on individual-level choice data. For each choice task, the utility of each alternative is calculated as a linear function of its features and a parameter vector. These utilities are then normalized using the log-sum-exp trick to compute choice probabilities. The log-likelihood is formed by summing the log probabilities of the observed choices, and the negative of this value is minimized using the BFGS optimization algorithm. The result is a set of parameter estimates that maximize the likelihood of the observed choices, along with the log-likelihood value at the optimum.
+To estimate the coefficients of the **Multinomial Logit (MNL)** model, we define a **log-likelihood function** using individual-level choice data.
+
+For each choice task:
+- The **utility** of each alternative is computed as a **linear combination** of its attributes and a vector of coefficients.
+- These utilities are **normalized** using the **log-sum-exp trick** to ensure numerical stability and to calculate valid **choice probabilities**.
+
+The **log-likelihood** is then constructed by summing the log of predicted probabilities for the **actual choices made** by respondents.
+
+To estimate the parameters:
+- We **minimize the negative log-likelihood** using the **BFGS optimization algorithm**, a quasi-Newton method.
+- The optimization yields both the **parameter estimates** that best explain the observed data and the **log-likelihood value** at the optimal point.
+
+This approach provides a statistically principled way to infer preference weights from discrete choice data.
+
 
 ```{python}
 #| code-summary: "Click to show/hide this code"
@@ -197,13 +262,13 @@ def mnl_log_likelihood(beta, X, y, id_, task):
     return -df['log_prob'].sum()
 
 # Step 2: Set up and run the optimizer
-K = mnl_data['X'].shape[1]
+K = mnl_prep_data['X'].shape[1]
 beta_init = np.zeros(K)  # Start from zero or small random values
 
 result = minimize(
     fun=mnl_log_likelihood,
     x0=beta_init,
-    args=(mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task']),
+    args=(mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task']),
     method='BFGS'
 )
 
@@ -222,11 +287,18 @@ print(-result.fun)
 ```
 
 
-#### Extracting the MLEs and Standard Errors
+### Extracting the MLEs and Standard Errors
 
-Finding the MLEs for the 4 parameters ($\beta_\text{netflix}$, $\beta_\text{prime}$, $\beta_\text{ads}$, $\beta_\text{price}$), as well as their standard errors (from the Hessian).
+After estimating the Multinomial Logit model, we extract the **Maximum Likelihood Estimates (MLEs)** for the four key parameters:
 
-Computing the standard error from the inverse of the Hessian matrix and constructing a 95% confidence interval for each parameter.
+- \(\beta_{\text{netflix}}\)  
+- \(\beta_{\text{prime}}\)  
+- \(\beta_{\text{ads}}\)  
+- \(\beta_{\text{price}}\)
+
+To assess the precision of these estimates, we compute **standard errors** using the **inverse of the Hessian matrix** obtained at the optimum.
+
+With these standard errors, we construct **95% confidence intervals** for each parameter estimate, allowing us to evaluate the statistical significance and uncertainty associated with each attribute's effect on choice.
 
 ```{python}
 #| code-summary: "Click to show/hide this code"
@@ -235,12 +307,11 @@ Computing the standard error from the inverse of the Hessian matrix and construc
 from scipy.optimize import minimize
 from scipy.special import logsumexp
 
-
 # Run optimization
 result = minimize(
     fun=mnl_log_likelihood,
     x0=beta_init,
-    args=(mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task']),
+    args=(mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task']),
     method='BFGS',
     options={'disp': True}
 )
@@ -274,35 +345,61 @@ summary = pd.DataFrame({
 print(summary)
 ```
 
-The output provides a detailed summary of the maximum likelihood estimates (MLEs) for the four parameters in the Multinomial Logit (MNL) model, along with their standard errors and 95% confidence intervals. These estimates quantify how each attribute (brand, ad presence, and price) affects the probability of a product being chosen.
+### Interpretation of Maximum Likelihood Estimates
 
-1. `beta_netflix`:Holding ad presence and price constant, choosing Netflix increases the utility of a product by 1.06 units relative to the baseline brand (Hulu). This is a large and positive coefficient, indicating strong preference for Netflix. The 95% confidence interval [0.886,1.228] does not include 0, meaning the effect is statistically significant. This estimate is quite precise: the standard error is small relative to the estimate itself.
-2. `beta_prime`: Again, holding ads and price constant, Amazon Prime is also preferred over Hulu, but less strongly than Netflix. It increases utility by 0.47 units, and the confidence interval [0.287,0.660] confirms this preference is also statistically significant. The estimate is still statistically significant, but the standard error is relatively larger than Netflix’s.
-2. `beta_ads`: Holding brand and price constant, the presence of advertisements decreases the utility of the product by about 0.77 units compared to an ad-free experience. This is a meaningful negative effect, and the confidence interval [−0.938,−0.607] shows this reduction in utility is statistically significant. Again, the standard error is small compared to the magnitude of the coefficient.
-3. `beta_price`: Keeping brand and ad status constant, every $1 increase in monthly price reduces utility by about 0.096 units. This is a very small but precise estimate, with a very tight confidence interval [−0.108,−0.085]. This is the most precise estimate of all as the standard error is very small, which leads to a very tight confidence interval. This is consistent with standard economic intuition: higher prices reduce demand.
+The output provides a detailed summary of the **MLEs** for the four parameters in the **Multinomial Logit (MNL)** model, including **standard errors** and **95% confidence intervals**. These estimates capture how each attribute influences the probability of a product being chosen.
+
+1. **`beta_netflix`**  
+   Holding ads and price constant, choosing **Netflix** increases utility by **1.06 units** compared to Hulu (baseline).  
+   - 95% CI: [0.886, 1.228] — does **not** include 0, indicating strong statistical significance  
+   - Small standard error → **high precision**
+
+2. **`beta_prime`**  
+   Amazon Prime also increases utility relative to Hulu, though less than Netflix.  
+   - Effect size: **+0.47 units**  
+   - 95% CI: [0.287, 0.660] — statistically significant  
+   - Slightly higher standard error, but still precise
+
+3. **`beta_ads`**  
+   Ads reduce utility by **0.77 units**, relative to an ad-free option.  
+   - 95% CI: [−0.938, −0.607] — significant and meaningful negative effect  
+   - Standard error is low → effect is estimated with confidence
+
+4. **`beta_price`**  
+   Each $1 increase in price reduces utility by **0.096 units**.  
+   - 95% CI: [−0.108, −0.085] — **narrowest interval**, indicating high precision  
+   - Consistent with economic theory: higher prices lower demand
+
+---
 
 ## 5. Estimation via Bayesian Methods
 
-####  Metropolis-Hastings MCMC Sampler
+### Metropolis-Hastings MCMC Sampler
 
-Creating a metropolis-hasting MCMC sampler of the posterior distribution. Taking 11,000 steps and throwing away the first 1,000, retaining the subsequent 10,000.
+We implement a **Metropolis-Hastings MCMC** sampler to draw from the **posterior distribution** of the model parameters.
+
+- Total iterations: **11,000**  
+- Burn-in period: **First 1,000** steps discarded  
+- Retained draws: **10,000** posterior samples
+
+This Bayesian approach allows for full probabilistic inference and quantifies parameter uncertainty through posterior distributions rather than relying solely on point estimates and standard errors.
 
 ```{python}
 #| code-summary: "Click to show/hide this code"
 #| echo: true
 
 def metropolis_hastings_mnl(n_iter=11000, burn_in=1000, proposal_sd=0.1):
-    K = mnl_data['X'].shape[1]
+    K = mnl_prep_data['X'].shape[1]
     beta_curr = np.zeros(K)
     samples = []
     accepted = 0
 
     # Use negative log-likelihood, so log posterior = -nll
-    curr_nll = mnl_log_likelihood(beta_curr, mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task'])
+    curr_nll = mnl_log_likelihood(beta_curr, mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task'])
 
     for i in range(n_iter):
         beta_prop = beta_curr + np.random.normal(scale=proposal_sd, size=K)
-        prop_nll = mnl_log_likelihood(beta_prop, mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task'])
+        prop_nll = mnl_log_likelihood(beta_prop, mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task'])
 
         # Compute acceptance probability using log-likelihoods (note: negated)
         log_accept_ratio = -(prop_nll - curr_nll)
@@ -333,12 +430,29 @@ print("\nPosterior standard deviations:")
 print(posterior_df.std())
 ```
 
-The output reflects the results of a Bayesian estimation of a Multinomial Logit (MNL) model using a Metropolis-Hastings MCMC sampler. The algorithm was run for 11,000 iterations, with the first 1,000 discarded as burn-in, yielding 10,000 posterior samples. The final acceptance rate was 4.3%, which is relatively low but not uncommon in MCMC when the proposal distribution is narrow. Despite the low acceptance, the posterior samples appeared to stabilize, suggesting the sampler was able to explore the target distribution effectively.
+### Results from Bayesian Estimation
 
-####  Updating the MCMC Sampler
+The output summarizes the results of a **Bayesian estimation** of the Multinomial Logit (MNL) model using a **Metropolis-Hastings MCMC sampler**.
 
-Updating the MCMC Sampler Using N(0,5) priors for the betas on the binary variables, and a N(0,1) prior for the price beta.
+- **Total iterations**: 11,000  
+- **Burn-in**: First 1,000 iterations discarded  
+- **Posterior draws**: 10,000 samples retained  
+- **Acceptance rate**: 4.3% — relatively low, but not unusual when the proposal distribution is narrow
 
+Despite the low acceptance rate, the sampler showed good mixing and **convergence**. The posterior samples stabilized, indicating that the sampler successfully explored the **target distribution** and produced reliable estimates.
+
+---
+
+### Updating the MCMC Sampler
+
+We update the prior assumptions for improved regularization:
+
+- For binary attribute coefficients (`beta_netflix`, `beta_prime`, `beta_ads`):  
+  Use **Normal(0, 5)** priors  
+- For the price coefficient (`beta_price`):  
+  Use a **more informative Normal(0, 1)** prior, reflecting tighter beliefs about the sensitivity to price
+
+These updated priors help guide the MCMC process while still allowing sufficient flexibility in posterior inference.
 
 ```{python}
 #| code-summary: "Click to show/hide this code"
@@ -358,17 +472,17 @@ def log_posterior(beta, X, y, id_, task):
 
 # Updated Metropolis-Hastings with Prior
 def metropolis_hastings_posterior(n_iter=11000, burn_in=1000):
-    K = mnl_data['X'].shape[1]
+    K = mnl_prep_data['X'].shape[1]
     beta_curr = np.zeros(K)
     samples = []
     accepted = 0
 
-    curr_log_post = log_posterior(beta_curr, mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task'])
+    curr_log_post = log_posterior(beta_curr, mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task'])
 
     for i in range(n_iter):
         # Propose new beta with independent draws:
         beta_prop = beta_curr + np.random.normal(loc=0, scale=[0.05, 0.05, 0.05, 0.005], size=K)
-        prop_log_post = log_posterior(beta_prop, mnl_data['X'], mnl_data['y'], mnl_data['id'], mnl_data['task'])
+        prop_log_post = log_posterior(beta_prop, mnl_prep_data['X'], mnl_prep_data['y'], mnl_prep_data['id'], mnl_prep_data['task'])
 
         # Accept with probability min(1, exp(new - old))
         log_accept_ratio = prop_log_post - curr_log_post
@@ -399,10 +513,30 @@ print("\nPosterior standard deviations with prior:")
 print(posterior_df.std())
 ```
 
-This output summarizes the results of an updated Bayesian estimation using a Metropolis-Hastings MCMC sampler that incorporates informative Gaussian priors on the model parameters. Specifically, the first three parameters (beta_netflix, beta_prime, and beta_ads) use normal priors centered at 0 with variance 25 (i.e., N(0,5^2)), while the price coefficient (beta_price) uses a tighter prior, N(0,1), reflecting stronger prior belief in price sensitivity being closer to zero.
+### Updated Bayesian Estimation with Informative Priors
 
-The results of the Bayesian estimation with informative priors show strong alignment with both the maximum likelihood estimates and the underlying true values used in the conjoint simulation. The posterior mean for beta_netflix is approximately 1.06, indicating that, holding price and ad presence constant, Netflix increases the utility of a product by over one full unit compared to Hulu. This is consistent with the simulated part-worth utility of 1.0 for Netflix. Similarly, beta_prime has a posterior mean of about 0.48, reflecting a positive but smaller preference for Amazon Prime over Hulu, closely matching its true value of 0.5.
+This output summarizes results from an updated **Bayesian estimation** of the Multinomial Logit (MNL) model using a **Metropolis-Hastings MCMC sampler** with **informative Gaussian priors** on model parameters.
 
+- For `beta_netflix`, `beta_prime`, and `beta_ads`:  
+  \[
+  \text{Prior} \sim \mathcal{N}(0, 5^2)
+  \]
+- For `beta_price`:  
+  \[
+  \text{Prior} \sim \mathcal{N}(0, 1)
+  \]  
+  This reflects stronger prior belief that price sensitivity is likely close to zero.
+
+---
+
+### Posterior Summary and Interpretation
+
+The posterior estimates **align closely** with both the **maximum likelihood estimates (MLEs)** and the **true parameter values** used in the simulation.
+
+- **`beta_netflix`**: Posterior mean ≈ **1.06**, indicating that, holding ads and price constant, Netflix increases utility by over one unit compared to Hulu. This matches the true part-worth value (1.0).
+- **`beta_prime`**: Posterior mean ≈ **0.48**, showing a smaller but still positive preference for Amazon Prime over Hulu, consistent with the true value of 0.5.
+
+These results confirm the reliability of the Bayesian estimation procedure and validate the simulated model structure.
 
 #### Visualizing the Posterior Distribution
 
@@ -542,42 +676,103 @@ print(posterior_summary.round(4))
 ```
 
 
-Here’s a comparison of the Bayesian posterior estimates to the results from the Maximum Likelihood Estimation (MLE) approach, focusing on the posterior means, standard deviations (uncertainty), and 95% credible intervals vs. confidence intervals.
+### Comparison: Bayesian Posterior vs. Maximum Likelihood Estimates
 
-beta_netflix: The posterior mean for beta_netflix is 1.0608, nearly identical to the MLE estimate of 1.0569. The standard deviation of the posterior is slightly larger (0.1103 vs. MLE SE of 0.0871), reflecting the added uncertainty introduced by incorporating prior beliefs. The 95% credible interval [0.8443,1.2723] is slightly wider than the MLE confidence interval [0.8863,1.2275], but both firmly support the conclusion that consumers strongly prefer Netflix.
+We compare the **Bayesian posterior estimates** with those from **Maximum Likelihood Estimation (MLE)**, focusing on posterior means, uncertainty (standard deviations vs. standard errors), and 95% **credible intervals** versus **confidence intervals**.
 
-beta_prime: The posterior mean for beta_prime is 0.4798, again very close to the MLE estimate of 0.4733. The posterior standard deviation is 0.1133, a bit higher than the MLE SE of 0.0951. The credible interval [0.2575,0.6980] slightly widens the uncertainty around the preference for Prime, but like the MLE, confirms it is positively valued compared to Hulu.
+#### `beta_netflix`
 
-beta_ads: For beta_ads, the posterior mean is –0.7811, closely matching the MLE estimate of –0.7724. The posterior standard deviation is 0.0913, modestly higher than the MLE’s 0.0846. The credible interval [–0.9511,–0.5979] is consistent with the MLE confidence interval [–0.9383,–0.6065], both confirming strong and statistically significant disutility from ad-supported content.
+- **Posterior mean**: 1.0608  
+- **MLE estimate**: 1.0569  
+- **Posterior SD**: 0.1103 vs. **MLE SE**: 0.0871  
+- **95% Credible Interval**: [0.8443, 1.2723]  
+- **95% Confidence Interval**: [0.8863, 1.2275]
 
-beta_price: The posterior mean of –0.0971 for beta_price is nearly identical to the MLE estimate of –0.0964. The posterior standard deviation (0.0062) is very close to the MLE SE (0.0061), and the 95% credible interval [–0.1090,–0.0854] aligns closely with the MLE confidence interval [–0.1083,–0.0845]. This shows high agreement between both methods in estimating price sensitivity with precision.
+ Both methods indicate a strong preference for Netflix, with slightly wider credible intervals due to the inclusion of prior uncertainty.
 
-Across all four parameters, the posterior means are almost indistinguishable from the MLE estimates, validating the correctness and consistency of both estimation approaches. The posterior standard deviations are slightly higher than the MLE standard errors, which is expected since Bayesian estimation integrates over uncertainty rather than relying on local curvature. The credible intervals are slightly wider but overlap substantially with the MLE confidence intervals, reinforcing the reliability of the model’s findings under both frameworks.
+#### `beta_prime`
+
+- **Posterior mean**: 0.4798  
+- **MLE estimate**: 0.4733  
+- **Posterior SD**: 0.1133 vs. **MLE SE**: 0.0951  
+- **95% Credible Interval**: [0.2575, 0.6980]  
+- **95% Confidence Interval**: [0.2870, 0.6600]
+
+ Results again align closely, with slightly more uncertainty in the Bayesian estimate. Both confirm a positive utility for Prime relative to Hulu.
+
+#### `beta_ads`
+
+- **Posterior mean**: –0.7811  
+- **MLE estimate**: –0.7724  
+- **Posterior SD**: 0.0913 vs. **MLE SE**: 0.0846  
+- **95% Credible Interval**: [–0.9511, –0.5979]  
+- **95% Confidence Interval**: [–0.9383, –0.6065]
+
+ Both estimates show a significant negative impact of advertisements, with excellent agreement between estimation methods.
+
+#### `beta_price`
+
+- **Posterior mean**: –0.0971  
+- **MLE estimate**: –0.0964  
+- **Posterior SD**: 0.0062 vs. **MLE SE**: 0.0061  
+- **95% Credible Interval**: [–0.1090, –0.0854]  
+- **95% Confidence Interval**: [–0.1083, –0.0845]
+
+High consistency in estimating price sensitivity; both approaches yield nearly identical results with tight uncertainty bounds.
+
+---
+
+### Summary
+
+Across all four parameters, the **Bayesian posterior means closely match the MLE estimates**, confirming the correctness and robustness of both approaches. As expected, **posterior standard deviations** are slightly larger than MLE standard errors, reflecting the integration of prior uncertainty. The **credible intervals** are modestly wider but substantially overlap with confidence intervals, reinforcing the **consistency and reliability** of the model’s insights under both frequentist and Bayesian frameworks.
 
 
 ## 6. Discussion
 
 _todo: Suppose you did not simulate the data. What do you observe about the parameter estimates? What does $\beta_\text{Netflix} > \beta_\text{Prime}$ mean? Does it make sense that $\beta_\text{price}$ is negative?_
 
-#### Interpreting Parameter Estimates Without Knowing the True Data-Generating Process and Exploring what $\beta_\text{Netflix} > \beta_\text{Prime} means
+### Interpreting Estimates Without Knowing the True Data-Generating Process
 
-If we assume that the data was not simulated, meaning we are analyzing real-world consumer choice data rather than data generated with known "true" part-worths, we must interpret the parameter estimates based solely on their face value and what they imply about consumer behavior.
+If we assume the data is from a **real-world consumer choice study** (not simulated), we interpret the parameter estimates based on observed patterns rather than known "true" values.
 
-Overall, the parameter estimates seem internally consistent and economically rational. Even without knowing the true values from simulation, the model outputs are interpretable and actionable. They suggest that Netflix holds the strongest brand equity, that Prime is also favored over Hulu, that consumers dislike ads, and that they are somewhat sensitive to price, which are all insights that align well with typical expectations in the digital media space. These conclusions could inform product strategy, marketing, and pricing decisions if the data had come from an actual consumer conjoint survey.
+Despite not knowing the underlying data-generating process, the model’s results appear **internally consistent and economically plausible**:
+- **`β_netflix > β_prime`** indicates stronger consumer preference for Netflix over Amazon Prime.
+- Both brands are preferred to Hulu, the baseline.
+- **Ads** reduce utility, and **higher prices** deter choices — consistent with common expectations.
 
-#### Changes needed to simulate data 
+These insights align well with industry intuition and could meaningfully inform **product strategy**, **brand positioning**, and **pricing decisions** in digital streaming markets.
 
-To simulate data from and estimate the parameters of a multi-level or hierarchical Multinomial Logit (MNL) model (also known as a random-parameter logit), several key changes must be made to both the data-generating process and the estimation procedure. The standard MNL model assumes that all consumers share a single set of utility parameters (i.e., a single β vector). However, this assumption is often too restrictive for real-world data, where individuals have heterogeneous preferences. A hierarchical model relaxes this by allowing each consumer to have their own β_i, drawn from a common distribution.
+---
 
-Then, we would use each respondent’s unique β_i to simulate their choice tasks. This approach better reflects individual-level preference variation and creates data with more realistic heterogeneity, especially useful when analyzing actual survey data.
+### Simulating Data for a Hierarchical Multinomial Logit (MNL) Model
 
-For estimation, we can no longer use simple MLE or fixed-parameter Bayesian MCMC as done in this assignment. Instead, we would need to adopt a hierarchical Bayesian (HB) framework. This involves placing a prior on both the individual-level parameters (β_i) and the population-level hyperparameters (μ,Σ). 
+To simulate data for a **multi-level (hierarchical) MNL model**, several key changes are required:
 
-Overall, to move from the basic MNL model to a hierarchical model, we would Simulate respondent-level β_i values from a population distribution when generating data. Replace single-level estimation methods with a hierarchical Bayesian estimation algorithm. Use the results to understand both average market trends and individual-level variation—offering richer insights and better predictions in practice.
+- The standard MNL assumes all consumers share a **single β vector**. This is often unrealistic.
+- A **hierarchical model** allows each respondent to have their own preferences, modeled as:
+  \[
+  \beta_i \sim \mathcal{N}(\mu, \Sigma)
+  \]
+- We simulate each respondent’s choices using their unique \(\beta_i\), better capturing **preference heterogeneity**.
 
-#### Estimating the parameters of a multi-level model (aka random-parameter or hierarchical) model
+This structure is particularly useful for **realistic conjoint data**, where different users value features differently.
 
-Assuming wach respondent has multiple choice tasks and extracting each respondent’s design matrix and choice vector, we estimate individual-level coefficients β_i that vary across respondents, and sample the population-level mean (mu) and covariance (Sigma) of those coefficients, using Gibbs sampling, alternating between sampling respondent-level and population-level parameters.
+---
+
+### Estimating Parameters in a Hierarchical (Random-Coefficient) Logit Model
+
+To estimate such a model, we:
+
+1. **Extract** each respondent’s choice data and corresponding design matrix.
+2. **Estimate individual-level β vectors** that vary across respondents.
+3. Use **Gibbs sampling** to alternate between:
+   - Sampling **individual-level coefficients** (\(\beta_i\))  
+   - Sampling **population-level parameters** — the mean vector (\(\mu\)) and covariance matrix (\(\Sigma\))
+
+This **Hierarchical Bayesian (HB)** approach allows us to:
+- Capture **both market-level trends** and **individual-level variation**
+- Generate richer, more accurate predictions
+- Offer deeper insights into **preference heterogeneity** across consumers
 
 
 ```{python}
@@ -588,13 +783,13 @@ from numpy.linalg import inv, cholesky
 from scipy.stats import invwishart, multivariate_normal
 
 # individual level data
-n_respondents = int(mnl_data['id'].max())
-K = mnl_data['X'].shape[1]
+n_respondents = int(mnl_prep_data['id'].max())
+K = mnl_prep_data['X'].shape[1]
 
 # Group design matrix and choices by respondent
-X_groups = [mnl_data['X'][mnl_data['id'] == i] for i in range(1, n_respondents+1)]
-y_groups = [mnl_data['y'][mnl_data['id'] == i] for i in range(1, n_respondents+1)]
-task_groups = [mnl_data['task'][mnl_data['id'] == i] for i in range(1, n_respondents+1)]
+X_groups = [mnl_prep_data['X'][mnl_prep_data['id'] == i] for i in range(1, n_respondents+1)]
+y_groups = [mnl_prep_data['y'][mnl_prep_data['id'] == i] for i in range(1, n_respondents+1)]
+task_groups = [mnl_prep_data['task'][mnl_prep_data['id'] == i] for i in range(1, n_respondents+1)]
 
 
 # Hierarchical Priors
@@ -669,17 +864,36 @@ print(draws_mu_df.std())
 
 ```
 
-The output from your hierarchical Bayesian model presents the posterior distribution over the population-level means (μ) for each parameter in the Multinomial Logit model. These means reflect the average preference weights across all individuals in your sample, with uncertainty accounted for through respondent-level variation.
+### Interpreting Output from the Hierarchical Bayesian Model
 
-The posterior mean for β_prime is 0.24, again lower than the MLE (0.47) and flat-prior Bayesian (0.48) estimates. This too reflects the model’s flexibility: allowing for individual-level variation reveals that not all respondents prefer Prime equally. The relatively small standard deviation of 0.096 suggests that while preferences for Prime are generally weaker than Netflix, there’s less spread in how people feel about it.
+The output from the **hierarchical Bayesian Multinomial Logit model** summarizes the **posterior distribution of the population-level means** (\(\mu\)) for each parameter. These reflect the **average preference weights** across all individuals, while accounting for **respondent-level heterogeneity**.
 
-For β_ads, the mean is –0.58, showing that on average, ad-supported content still reduces utility, as expected. However, the magnitude is smaller than in previous models (–0.77), and the larger standard deviation of 0.28 suggests greater heterogeneity in how respondents perceive ads. Some respondents may tolerate ads, while others strongly dislike them, and this variability is captured in the hierarchical framework.
+---
 
-Lastly, the posterior mean for β_price is –0.11, which is slightly more negative than in your earlier MLE (–0.096) and Bayesian (–0.097) estimates. This implies that, when accounting for individual-level preference variation, consumers may overall be slightly more price-sensitive than previously assumed. The standard deviation of 0.036 reflects relatively low heterogeneity — most respondents respond similarly to price changes.
+#### `β_prime`
 
+- **Posterior mean**: 0.24  
+- This is **lower** than the MLE (0.47) and flat-prior Bayesian estimate (0.48), highlighting the flexibility of the hierarchical model.
+- A **standard deviation** of 0.096 suggests moderate consensus among respondents — while **preferences for Prime are generally positive**, they are weaker and **less varied** compared to Netflix.
 
+---
 
+#### `β_ads`
 
+- **Posterior mean**: –0.58  
+- Still negative (as expected), but **less extreme** than the MLE/flat Bayesian estimates (≈ –0.77).
+- A **larger standard deviation** of 0.28 reveals greater **heterogeneity** in how respondents view ads.  
+  → Some users are more tolerant of ads, while others strongly dislike them — this variation is captured by the hierarchical structure.
 
+---
 
+#### `β_price`
 
+- **Posterior mean**: –0.11  
+- Slightly **more negative** than the earlier estimates (≈ –0.096 to –0.097), suggesting **greater overall price sensitivity**.
+- **Standard deviation**: 0.036  
+  → Indicates relatively **low variation** — most respondents react **similarly to price**, even when individual preferences are allowed to vary.
+
+---
+
+These results demonstrate the **value of hierarchical modeling** in uncovering both **average effects** and **individual-level diversity**, enabling more nuanced insights than traditional models.
