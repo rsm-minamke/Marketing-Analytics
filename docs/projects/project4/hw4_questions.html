@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.5">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mrunmayee Inamke">
+<meta name="dcterms.date" content="2025-06-13">
+
+<title>Latent class MNL and KNN – Mrunmayee’s website</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ff4371ef257df69894857e99c6ad0d06.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-d78ade537ade6455d3cf53e3b000ae7d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Mrunmayee’s website</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../resume.html"> 
+<span class="menu-text">Resume</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#latent-class-multinomial-logit-lc-mnl-model" id="toc-latent-class-multinomial-logit-lc-mnl-model" class="nav-link active" data-scroll-target="#latent-class-multinomial-logit-lc-mnl-model">Latent Class Multinomial Logit (LC-MNL) Model</a>
+  <ul class="collapse">
+  <li><a href="#model-framework" id="toc-model-framework" class="nav-link" data-scroll-target="#model-framework">Model Framework</a></li>
+  <li><a href="#role-of-alternative-specific-constants-ascs" id="toc-role-of-alternative-specific-constants-ascs" class="nav-link" data-scroll-target="#role-of-alternative-specific-constants-ascs">Role of Alternative-Specific Constants (ASCs)</a></li>
+  <li><a href="#dataset-description" id="toc-dataset-description" class="nav-link" data-scroll-target="#dataset-description">Dataset Description</a></li>
+  <li><a href="#goals-of-this-analysis" id="toc-goals-of-this-analysis" class="nav-link" data-scroll-target="#goals-of-this-analysis">Goals of This Analysis</a></li>
+  <li><a href="#standard-multinomial-logit-mnl-model-on-yogurt-data" id="toc-standard-multinomial-logit-mnl-model-on-yogurt-data" class="nav-link" data-scroll-target="#standard-multinomial-logit-mnl-model-on-yogurt-data">Standard Multinomial Logit (MNL) Model on Yogurt Data</a></li>
+  <li><a href="#encoding-alternatives-as-dummy-variables" id="toc-encoding-alternatives-as-dummy-variables" class="nav-link" data-scroll-target="#encoding-alternatives-as-dummy-variables">Encoding Alternatives as Dummy Variables</a></li>
+  <li><a href="#python-implementation" id="toc-python-implementation" class="nav-link" data-scroll-target="#python-implementation">Python Implementation</a></li>
+  <li><a href="#latent-class-mnl-model-on-yogurt-dataset" id="toc-latent-class-mnl-model-on-yogurt-dataset" class="nav-link" data-scroll-target="#latent-class-mnl-model-on-yogurt-dataset">Latent class MNL model on Yogurt dataset</a></li>
+  <li><a href="#selecting-the-optimal-number-of-latent-classes" id="toc-selecting-the-optimal-number-of-latent-classes" class="nav-link" data-scroll-target="#selecting-the-optimal-number-of-latent-classes">Selecting the Optimal Number of Latent Classes</a></li>
+  <li><a href="#model-comparison-using-bic" id="toc-model-comparison-using-bic" class="nav-link" data-scroll-target="#model-comparison-using-bic">Model Comparison Using BIC</a></li>
+  <li><a href="#interpreting-bic-in-lc-mnl-context" id="toc-interpreting-bic-in-lc-mnl-context" class="nav-link" data-scroll-target="#interpreting-bic-in-lc-mnl-context">Interpreting BIC in LC-MNL Context</a></li>
+  <li><a href="#implementation-strategy" id="toc-implementation-strategy" class="nav-link" data-scroll-target="#implementation-strategy">Implementation Strategy</a></li>
+  </ul></li>
+  <li><a href="#k-nearest-neighbors-knn" id="toc-k-nearest-neighbors-knn" class="nav-link" data-scroll-target="#k-nearest-neighbors-knn">K Nearest Neighbors (KNN)</a>
+  <ul class="collapse">
+  <li><a href="#intuition-and-workflow" id="toc-intuition-and-workflow" class="nav-link" data-scroll-target="#intuition-and-workflow">Intuition and Workflow</a></li>
+  <li><a href="#euclidean-distance-measuring-similarity-in-feature-space" id="toc-euclidean-distance-measuring-similarity-in-feature-space" class="nav-link" data-scroll-target="#euclidean-distance-measuring-similarity-in-feature-space">Euclidean Distance: Measuring Similarity in Feature Space</a></li>
+  <li><a href="#decision-rule-in-knn-classification" id="toc-decision-rule-in-knn-classification" class="nav-link" data-scroll-target="#decision-rule-in-knn-classification">Decision Rule in KNN Classification</a></li>
+  <li><a href="#how-to-choose-the-right-value-of-k" id="toc-how-to-choose-the-right-value-of-k" class="nav-link" data-scroll-target="#how-to-choose-the-right-value-of-k">How to Choose the Right Value of ( k )</a></li>
+  <li><a href="#practical-walkthrough-knn-on-synthetic-data" id="toc-practical-walkthrough-knn-on-synthetic-data" class="nav-link" data-scroll-target="#practical-walkthrough-knn-on-synthetic-data">Practical Walkthrough: KNN on Synthetic Data</a></li>
+  <li><a href="#knn-implementation-by-hand-vs-kneighborsclassifier" id="toc-knn-implementation-by-hand-vs-kneighborsclassifier" class="nav-link" data-scroll-target="#knn-implementation-by-hand-vs-kneighborsclassifier">KNN implementation by hand Vs KNeighborsClassifier</a></li>
+  <li><a href="#interpreting-knn-performance-across-different-values-of-k" id="toc-interpreting-knn-performance-across-different-values-of-k" class="nav-link" data-scroll-target="#interpreting-knn-performance-across-different-values-of-k">Interpreting KNN Performance Across Different Values of ( k )</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Latent class MNL and KNN</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Mrunmayee Inamke </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 13, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="latent-class-multinomial-logit-lc-mnl-model" class="level2">
+<h2 class="anchored" data-anchor-id="latent-class-multinomial-logit-lc-mnl-model">Latent Class Multinomial Logit (LC-MNL) Model</h2>
+<p>In this project, we develop and estimate a <strong>Latent Class Multinomial Logit (LC-MNL)</strong> model using data on consumer yogurt purchases. The LC-MNL model enhances the standard Multinomial Logit (MNL) approach by accounting for <strong>unobserved heterogeneity</strong> in consumer preferences. While the MNL model assumes a homogeneous population where all individuals share the same utility parameters, the LC-MNL model allows for <strong>multiple latent (hidden) classes</strong> of decision-makers, each with distinct choice behaviors.</p>
+<p>By segmenting individuals into these latent classes, we can capture varying sensitivities to product attributes, such as price and promotional features, providing a richer understanding of consumer behavior.</p>
+<section id="model-framework" class="level3">
+<h3 class="anchored" data-anchor-id="model-framework">Model Framework</h3>
+<p>The utility that individual <span class="math inline">\(n\)</span> derives from choosing alternative <span class="math inline">\(j\)</span> within class <span class="math inline">\(s\)</span> is modeled as:</p>
+<p><span class="math display">\[
+U_{nj}^{(s)} = X_{nj}'\beta_s + \varepsilon_{nj}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(X_{nj}\)</span> is a vector of observed attributes for alternative <span class="math inline">\(j\)</span> as faced by individual <span class="math inline">\(n\)</span>,</li>
+<li><span class="math inline">\(\beta_s\)</span> is a vector of class-specific coefficients for class <span class="math inline">\(s\)</span>,</li>
+<li><span class="math inline">\(\varepsilon_{nj}\)</span> is an idiosyncratic error term assumed to follow an i.i.d. Gumbel distribution.</li>
+</ul>
+<p>Each individual has a probability <span class="math inline">\(\pi_s\)</span> of belonging to latent class <span class="math inline">\(s\)</span>, such that:</p>
+<p><span class="math display">\[
+\sum_{s=1}^{S} \pi_s = 1
+\]</span></p>
+<p>The unconditional probability that individual <span class="math inline">\(n\)</span> chooses alternative <span class="math inline">\(j\)</span> is computed by integrating over all classes:</p>
+<p><span class="math display">\[
+P_{nj} = \sum_{s=1}^{S} \pi_s \cdot \frac{\exp(X_{nj}'\beta_s)}{\sum_{k=1}^{J} \exp(X_{nk}'\beta_s)}
+\]</span></p>
+<p>This formulation allows each class to have its own set of preferences, with the class membership probabilities <span class="math inline">\(\pi_s\)</span> acting as mixture weights.</p>
+</section>
+<section id="role-of-alternative-specific-constants-ascs" class="level3">
+<h3 class="anchored" data-anchor-id="role-of-alternative-specific-constants-ascs">Role of Alternative-Specific Constants (ASCs)</h3>
+<p>To capture unmeasured factors that systematically affect utility for certain products, we include <strong>Alternative-Specific Constants (ASCs)</strong> in our utility specification. ASCs reflect inherent preferences for each product, above and beyond observed features such as price or promotional display. The utility function becomes:</p>
+<p><span class="math display">\[
+U_{nj} = ASC_j + \beta_1 \cdot \text{price}_{nj} + \beta_2 \cdot \text{featured}_{nj} + \varepsilon_{nj}
+\]</span></p>
+<p>Here:</p>
+<ul>
+<li><span class="math inline">\(ASC_j\)</span> is the constant for alternative <span class="math inline">\(j\)</span>, omitted for one base product to avoid perfect multicollinearity,</li>
+<li><span class="math inline">\(\text{price}_{nj}\)</span> is the price per ounce of the product,</li>
+<li><span class="math inline">\(\text{featured}_{nj}\)</span> is a binary indicator of whether the product was on promotion.</li>
+</ul>
+<p>ASCs capture relative preferences between products when all other observed attributes are held constant.</p>
+</section>
+<section id="dataset-description" class="level3">
+<h3 class="anchored" data-anchor-id="dataset-description">Dataset Description</h3>
+<p>The yogurt dataset includes:</p>
+<ul>
+<li><code>id</code>: An anonymized identifier for each consumer,</li>
+<li><code>y1</code>–<code>y4</code>: Indicators denoting the yogurt product chosen during each purchase instance,</li>
+<li><code>p1</code>–<code>p4</code>: Prices of the four yogurt products (in price-per-ounce),</li>
+<li><code>f1</code>–<code>f4</code>: Binary indicators for whether each product was “featured” (i.e., on promotional display) during the purchase.</li>
+</ul>
+<p>For example, if a consumer with ID <code>1</code> purchased yogurt product 4 at a price of $0.079 per ounce and none of the yogurts were promoted, this would be encoded by setting <code>y4 = 1</code>, <code>p4 = 0.079</code>, and all <code>f1</code> to <code>f4</code> equal to <code>0</code>.</p>
+<p>This dataset structure allows us to analyze how consumers trade off price and promotional status when making their yogurt choices—and how these tradeoffs differ across latent segments of the population.</p>
+</section>
+<section id="goals-of-this-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="goals-of-this-analysis">Goals of This Analysis</h3>
+<p>By estimating a latent class MNL model, we aim to:</p>
+<ul>
+<li>Identify distinct consumer segments based on their price sensitivity and responsiveness to promotions,</li>
+<li>Quantify heterogeneity in preferences across these latent segments,</li>
+<li>Improve predictive performance relative to a standard MNL model by accommodating unobserved preference variation.</li>
+</ul>
+<p>The next sections will cover data preprocessing, model estimation, and interpretation of results.</p>
+<div id="ac9c514e" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>yog_data <span class="op">=</span> pd.read_csv(<span class="st">'yogurt_data.csv'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>yog_data.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">y1</th>
+<th data-quarto-table-cell-role="th">y2</th>
+<th data-quarto-table-cell-role="th">y3</th>
+<th data-quarto-table-cell-role="th">y4</th>
+<th data-quarto-table-cell-role="th">f1</th>
+<th data-quarto-table-cell-role="th">f2</th>
+<th data-quarto-table-cell-role="th">f3</th>
+<th data-quarto-table-cell-role="th">f4</th>
+<th data-quarto-table-cell-role="th">p1</th>
+<th data-quarto-table-cell-role="th">p2</th>
+<th data-quarto-table-cell-role="th">p3</th>
+<th data-quarto-table-cell-role="th">p4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.081</td>
+<td>0.061</td>
+<td>0.079</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.098</td>
+<td>0.064</td>
+<td>0.075</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.098</td>
+<td>0.061</td>
+<td>0.086</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.098</td>
+<td>0.061</td>
+<td>0.086</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.125</td>
+<td>0.098</td>
+<td>0.049</td>
+<td>0.079</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.092</td>
+<td>0.050</td>
+<td>0.079</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>7</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.103</td>
+<td>0.081</td>
+<td>0.049</td>
+<td>0.079</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>8</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.086</td>
+<td>0.054</td>
+<td>0.079</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>9</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.098</td>
+<td>0.050</td>
+<td>0.079</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>10</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+<td>0.098</td>
+<td>0.050</td>
+<td>0.079</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We will first reshape this dataset from wide to long format</p>
+<div id="e5ff2c1c" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Reshape dataset </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Reshape dataset </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>yog_data <span class="op">=</span> pd.wide_to_long(yog_data,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                          stubnames<span class="op">=</span>[<span class="st">'y'</span>, <span class="st">'f'</span>, <span class="st">'p'</span>],</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                          i<span class="op">=</span><span class="st">'id'</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                          j<span class="op">=</span><span class="st">'product'</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                          sep<span class="op">=</span><span class="st">''</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                          suffix<span class="op">=</span><span class="st">'[1-4]'</span>).reset_index()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename columns for clarity</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>yog_data <span class="op">=</span> yog_data.rename(columns<span class="op">=</span>{</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'y'</span>: <span class="st">'chosen'</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'f'</span>: <span class="st">'featured'</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'p'</span>: <span class="st">'price'</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>yog_data.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">id</th>
+<th data-quarto-table-cell-role="th">product</th>
+<th data-quarto-table-cell-role="th">chosen</th>
+<th data-quarto-table-cell-role="th">featured</th>
+<th data-quarto-table-cell-role="th">price</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.125</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>7</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.103</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>8</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>9</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>10</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0.108</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>In the above reshaped data, each row represents a consumer–product combination with with data about if the product was chosen by the consumer, if the product was featured abd the price per ounce for that product.</p>
+</section>
+<section id="standard-multinomial-logit-mnl-model-on-yogurt-data" class="level3">
+<h3 class="anchored" data-anchor-id="standard-multinomial-logit-mnl-model-on-yogurt-data">Standard Multinomial Logit (MNL) Model on Yogurt Data</h3>
+<p>Before implementing more advanced models such as Latent Class MNL, we begin by fitting a <strong>standard Multinomial Logit (MNL)</strong> model using the yogurt dataset. This serves as a useful benchmark and helps build foundational understanding of how product attributes influence consumer choices.</p>
+<p>To estimate the MNL model, we use a <strong>long-format (reshaped) dataset</strong> where each row represents an alternative within a choice situation. The model will estimate the probability of each alternative being chosen, given its attributes (e.g., price and featured status).</p>
+</section>
+<section id="encoding-alternatives-as-dummy-variables" class="level3">
+<h3 class="anchored" data-anchor-id="encoding-alternatives-as-dummy-variables">Encoding Alternatives as Dummy Variables</h3>
+<p>When using libraries such as <code>statsmodels</code> in Python, <strong>Alternative-Specific Constants (ASCs)</strong> are not automatically generated from categorical variables such as product identifiers. Unlike R packages (e.g., <code>mlogit</code>) which handle these internally, in Python we must <strong>explicitly create dummy variables</strong> to account for baseline preferences across alternatives.</p>
+<p>To incorporate ASCs in our model, we perform the following steps:</p>
+<section id="one-hot-encode-the-product-variable" class="level4">
+<h4 class="anchored" data-anchor-id="one-hot-encode-the-product-variable">1. One-Hot Encode the Product Variable</h4>
+<p>We begin by transforming the <code>product</code> identifier into <strong>dummy variables</strong> using one-hot encoding. Each product is represented as a binary column indicating its presence in the current row.</p>
+<p>To avoid the <strong>dummy variable trap</strong> (perfect multicollinearity), we drop one of the product columns—typically for product 1—and treat it as the <strong>reference category</strong>. The resulting dummies become proxies for ASCs. They measure how much more or less preferred each product is compared to the base alternative, after controlling for observed features like price and promotion.</p>
+<p>Without ASCs, the MNL model would incorrectly assume that all products are equally attractive when their observable attributes are the same, which is often unrealistic in real-world markets.</p>
+</section>
+<section id="merge-dummy-variables-into-the-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="merge-dummy-variables-into-the-dataset">2. Merge Dummy Variables into the Dataset</h4>
+<p>Once the dummy variables are created, we append them to the original dataset. These columns are now part of the explanatory variables used in the MNL estimation. Together with <code>price</code> and <code>featured</code>, these product dummies allow us to model both <strong>measurable</strong> and <strong>inherent</strong> product appeal.</p>
+<p>This setup results in a model specification of the form:</p>
+<p><span class="math display">\[
+U_{nj} = ASC_j + \beta_1 \cdot \text{price}_{nj} + \beta_2 \cdot \text{featured}_{nj} + \varepsilon_{nj}
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(ASC_j\)</span> is the dummy variable for product <span class="math inline">\(j\)</span> (excluding the base category),</li>
+<li><span class="math inline">\(\text{price}_{nj}\)</span> is the price per ounce of alternative <span class="math inline">\(j\)</span> for individual <span class="math inline">\(n\)</span>,</li>
+<li><span class="math inline">\(\text{featured}_{nj}\)</span> is a binary variable indicating whether the product was on promotion.</li>
+</ul>
+</section>
+</section>
+<section id="python-implementation" class="level3">
+<h3 class="anchored" data-anchor-id="python-implementation">Python Implementation</h3>
+<p>Below, we present the Python code that performs these steps—generating one-hot encoded product variables and merging them with the dataset. This prepares the data for estimation using a discrete choice modeling package such as <code>statsmodels.discrete.discrete_model.MNLogit</code> or <code>pylogit</code>.</p>
+<div id="8da627ca" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>encoder <span class="op">=</span> OneHotEncoder(drop<span class="op">=</span><span class="st">'first'</span>, sparse_output<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>product_dummies <span class="op">=</span> encoder.fit_transform(yog_data[[<span class="st">'product'</span>]])</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create DataFrame with appropriate column names</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>product_dummies_df <span class="op">=</span> pd.DataFrame(product_dummies, columns<span class="op">=</span>encoder.get_feature_names_out())</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge dummies with main data</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>yog_data <span class="op">=</span> pd.concat([yog_data.reset_index(drop<span class="op">=</span><span class="va">True</span>), product_dummies_df.reset_index(drop<span class="op">=</span><span class="va">True</span>)], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>product_dummies_df</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Define independent variables (price, featured, and ASCs)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> yog_data[[<span class="st">'price'</span>, <span class="st">'featured'</span>] <span class="op">+</span> <span class="bu">list</span>(product_dummies_df.columns)]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(X)  <span class="co"># Add intercept</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>X</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">const</th>
+<th data-quarto-table-cell-role="th">price</th>
+<th data-quarto-table-cell-role="th">featured</th>
+<th data-quarto-table-cell-role="th">product_2</th>
+<th data-quarto-table-cell-role="th">product_3</th>
+<th data-quarto-table-cell-role="th">product_4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1.0</td>
+<td>0.108</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1.0</td>
+<td>0.108</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1.0</td>
+<td>0.108</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1.0</td>
+<td>0.108</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1.0</td>
+<td>0.125</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9715</td>
+<td>1.0</td>
+<td>0.086</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9716</td>
+<td>1.0</td>
+<td>0.086</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9717</td>
+<td>1.0</td>
+<td>0.086</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9718</td>
+<td>1.0</td>
+<td>0.086</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9719</td>
+<td>1.0</td>
+<td>0.079</td>
+<td>0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>9720 rows × 6 columns</p>
+</div>
+</div>
+</div>
+<p>The independent variables for the model includes:</p>
+<ul>
+<li><p>price: price per ounce</p></li>
+<li><p>featured: whether the product was promoted</p></li>
+<li><p>product_2, product_3, product_4: dummy variables representing ASCs for products 2, 3, and 4 (product 1 is the reference)</p></li>
+</ul>
+<div id="cb8d0a1a" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dependent variable: whether the product was chosen (1 if chosen, 0 otherwise)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> yog_data[<span class="st">'chosen'</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>0       0
+1       0
+2       0
+3       0
+4       0
+       ..
+9715    1
+9716    1
+9717    1
+9718    1
+9719    1
+Name: chosen, Length: 9720, dtype: int64</code></pre>
+</div>
+</div>
+<p>The above data is our dependent variable.</p>
+<div id="35934e8f" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the Multinomial Logit model</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.MNLogit(target, X)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> model.fit()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Show model summary</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>result.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimization terminated successfully.
+         Current function value: 0.477971
+         Iterations 7</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<caption>MNLogit Regression Results</caption>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Dep. Variable:</td>
+<td>chosen</td>
+<td data-quarto-table-cell-role="th">No. Observations:</td>
+<td>9720</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Model:</td>
+<td>MNLogit</td>
+<td data-quarto-table-cell-role="th">Df Residuals:</td>
+<td>9714</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Method:</td>
+<td>MLE</td>
+<td data-quarto-table-cell-role="th">Df Model:</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Date:</td>
+<td>Fri, 13 Jun 2025</td>
+<td data-quarto-table-cell-role="th">Pseudo R-squ.:</td>
+<td>0.1500</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Time:</td>
+<td>11:47:32</td>
+<td data-quarto-table-cell-role="th">Log-Likelihood:</td>
+<td>-4645.9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">converged:</td>
+<td>True</td>
+<td data-quarto-table-cell-role="th">LL-Null:</td>
+<td>-5465.9</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Covariance Type:</td>
+<td>nonrobust</td>
+<td data-quarto-table-cell-role="th">LLR p-value:</td>
+<td>0.000</td>
+</tr>
+</tbody>
+</table>
+
+
+<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">chosen=1</td>
+<td data-quarto-table-cell-role="th">coef</td>
+<td data-quarto-table-cell-role="th">std err</td>
+<td data-quarto-table-cell-role="th">z</td>
+<td data-quarto-table-cell-role="th">P&gt;|z|</td>
+<td data-quarto-table-cell-role="th">[0.025</td>
+<td data-quarto-table-cell-role="th">0.975]</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">const</td>
+<td>2.7009</td>
+<td>0.229</td>
+<td>11.795</td>
+<td>0.000</td>
+<td>2.252</td>
+<td>3.150</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">price</td>
+<td>-31.9761</td>
+<td>2.089</td>
+<td>-15.305</td>
+<td>0.000</td>
+<td>-36.071</td>
+<td>-27.881</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">featured</td>
+<td>0.4714</td>
+<td>0.119</td>
+<td>3.959</td>
+<td>0.000</td>
+<td>0.238</td>
+<td>0.705</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">product_2</td>
+<td>-0.5166</td>
+<td>0.081</td>
+<td>-6.354</td>
+<td>0.000</td>
+<td>-0.676</td>
+<td>-0.357</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">product_3</td>
+<td>-4.5584</td>
+<td>0.173</td>
+<td>-26.319</td>
+<td>0.000</td>
+<td>-4.898</td>
+<td>-4.219</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">product_4</td>
+<td>-1.4179</td>
+<td>0.089</td>
+<td>-16.008</td>
+<td>0.000</td>
+<td>-1.591</td>
+<td>-1.244</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>From the above summary we see, that</p>
+<ul>
+<li><p>Price has a very strong negative effect on the choice. Even a small increase in price substantially reduced the choice probability.</p></li>
+<li><p>Featured promotions positively impact the consumer decision. This effect is small.</p></li>
+<li><p>Product 1 is the most preferred product and Product 2 is least preferred.</p></li>
+</ul>
+</section>
+<section id="latent-class-mnl-model-on-yogurt-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="latent-class-mnl-model-on-yogurt-dataset">Latent class MNL model on Yogurt dataset</h3>
+<p>Next, we will fit a Latent-class MNL on the same data.</p>
+<div id="3b0b4a85" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pip install biogeme</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Requirement already satisfied: biogeme in /opt/conda/lib/python3.12/site-packages (3.2.14)
+Requirement already satisfied: pandas&lt;3,&gt;=2.2.2 in /opt/conda/lib/python3.12/site-packages (from biogeme) (2.2.3)
+Requirement already satisfied: scipy&lt;2,&gt;=1.14.0 in /opt/conda/lib/python3.12/site-packages (from biogeme) (1.15.3)
+Requirement already satisfied: tqdm&gt;=4.66.4 in /opt/conda/lib/python3.12/site-packages (from biogeme) (4.66.5)
+Requirement already satisfied: tomlkit&gt;=0.12.5 in /opt/conda/lib/python3.12/site-packages (from biogeme) (0.13.2)
+Requirement already satisfied: python-levenshtein&gt;=0.25.1 in /opt/conda/lib/python3.12/site-packages (from biogeme) (0.27.1)
+Requirement already satisfied: fuzzywuzzy&gt;=0.18.0 in /opt/conda/lib/python3.12/site-packages (from biogeme) (0.18.0)
+Requirement already satisfied: cythonbiogeme==1.0.4 in /opt/conda/lib/python3.12/site-packages (from biogeme) (1.0.4)
+Requirement already satisfied: biogeme-optimization==0.0.10 in /opt/conda/lib/python3.12/site-packages (from biogeme) (0.0.10)
+Requirement already satisfied: matplotlib&lt;4,&gt;=3.9.0 in /opt/conda/lib/python3.12/site-packages (from biogeme) (3.9.2)
+Requirement already satisfied: numpy&lt;3,&gt;=2.0.0 in /opt/conda/lib/python3.12/site-packages (from biogeme) (2.3.0)
+Requirement already satisfied: ipython&gt;=8.25.0 in /opt/conda/lib/python3.12/site-packages (from biogeme) (8.29.0)
+Requirement already satisfied: Jinja2&gt;=3.1.4 in /opt/conda/lib/python3.12/site-packages (from biogeme) (3.1.4)
+Requirement already satisfied: decorator in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (5.1.1)
+Requirement already satisfied: jedi&gt;=0.16 in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (0.19.1)
+Requirement already satisfied: matplotlib-inline in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (0.1.7)
+Requirement already satisfied: prompt-toolkit&lt;3.1.0,&gt;=3.0.41 in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (3.0.48)
+Requirement already satisfied: pygments&gt;=2.4.0 in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (2.18.0)
+Requirement already satisfied: stack-data in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (0.6.2)
+Requirement already satisfied: traitlets&gt;=5.13.0 in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (5.14.3)
+Requirement already satisfied: pexpect&gt;4.3 in /opt/conda/lib/python3.12/site-packages (from ipython&gt;=8.25.0-&gt;biogeme) (4.9.0)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /opt/conda/lib/python3.12/site-packages (from Jinja2&gt;=3.1.4-&gt;biogeme) (2.1.5)
+Requirement already satisfied: contourpy&gt;=1.0.1 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (1.3.0)
+Requirement already satisfied: cycler&gt;=0.10 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (0.12.1)
+Requirement already satisfied: fonttools&gt;=4.22.0 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (4.54.1)
+Requirement already satisfied: kiwisolver&gt;=1.3.1 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (1.4.7)
+Requirement already satisfied: packaging&gt;=20.0 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (24.1)
+Requirement already satisfied: pillow&gt;=8 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (11.0.0)
+Requirement already satisfied: pyparsing&gt;=2.3.1 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (3.2.0)
+Requirement already satisfied: python-dateutil&gt;=2.7 in /opt/conda/lib/python3.12/site-packages (from matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (2.9.0)
+Requirement already satisfied: pytz&gt;=2020.1 in /opt/conda/lib/python3.12/site-packages (from pandas&lt;3,&gt;=2.2.2-&gt;biogeme) (2024.1)
+Requirement already satisfied: tzdata&gt;=2022.7 in /opt/conda/lib/python3.12/site-packages (from pandas&lt;3,&gt;=2.2.2-&gt;biogeme) (2024.2)
+Requirement already satisfied: Levenshtein==0.27.1 in /opt/conda/lib/python3.12/site-packages (from python-levenshtein&gt;=0.25.1-&gt;biogeme) (0.27.1)
+Requirement already satisfied: rapidfuzz&lt;4.0.0,&gt;=3.9.0 in /opt/conda/lib/python3.12/site-packages (from Levenshtein==0.27.1-&gt;python-levenshtein&gt;=0.25.1-&gt;biogeme) (3.13.0)
+Requirement already satisfied: parso&lt;0.9.0,&gt;=0.8.3 in /opt/conda/lib/python3.12/site-packages (from jedi&gt;=0.16-&gt;ipython&gt;=8.25.0-&gt;biogeme) (0.8.4)
+Requirement already satisfied: ptyprocess&gt;=0.5 in /opt/conda/lib/python3.12/site-packages (from pexpect&gt;4.3-&gt;ipython&gt;=8.25.0-&gt;biogeme) (0.7.0)
+Requirement already satisfied: wcwidth in /opt/conda/lib/python3.12/site-packages (from prompt-toolkit&lt;3.1.0,&gt;=3.0.41-&gt;ipython&gt;=8.25.0-&gt;biogeme) (0.2.13)
+Requirement already satisfied: six&gt;=1.5 in /opt/conda/lib/python3.12/site-packages (from python-dateutil&gt;=2.7-&gt;matplotlib&lt;4,&gt;=3.9.0-&gt;biogeme) (1.16.0)
+Requirement already satisfied: executing&gt;=1.2.0 in /opt/conda/lib/python3.12/site-packages (from stack-data-&gt;ipython&gt;=8.25.0-&gt;biogeme) (2.1.0)
+Requirement already satisfied: asttokens&gt;=2.1.0 in /opt/conda/lib/python3.12/site-packages (from stack-data-&gt;ipython&gt;=8.25.0-&gt;biogeme) (2.4.1)
+Requirement already satisfied: pure-eval in /opt/conda/lib/python3.12/site-packages (from stack-data-&gt;ipython&gt;=8.25.0-&gt;biogeme) (0.2.3)
+Note: you may need to restart the kernel to use updated packages.</code></pre>
+</div>
+</div>
+<div id="134be442" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> biogeme.database <span class="im">as</span> db</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> biogeme.biogeme <span class="im">as</span> bio</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> biogeme.expressions <span class="im">import</span> Beta, log, exp</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> biogeme <span class="im">import</span> models</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lc_mnl(K, df):</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    database <span class="op">=</span> db.Database(<span class="st">"yogurt"</span>, df)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    database.variables[<span class="st">'Choice'</span>] <span class="op">=</span> df[<span class="st">'chosen'</span>]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    av <span class="op">=</span> {<span class="dv">1</span>: <span class="dv">1</span>, <span class="dv">2</span>: <span class="dv">1</span>, <span class="dv">3</span>: <span class="dv">1</span>, <span class="dv">4</span>: <span class="dv">1</span>}</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    class_utilities <span class="op">=</span> []</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    membership_betas <span class="op">=</span> []</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, K <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        ASC2 <span class="op">=</span> Beta(<span class="ss">f'ASC2_class</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="dv">0</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">0</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        ASC3 <span class="op">=</span> Beta(<span class="ss">f'ASC3_class</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="dv">0</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">0</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        ASC4 <span class="op">=</span> Beta(<span class="ss">f'ASC4_class</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="dv">0</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">0</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        B_PRICE <span class="op">=</span> Beta(<span class="ss">f'B_PRICE_class</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="dv">0</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">0</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        B_FEAT <span class="op">=</span> Beta(<span class="ss">f'B_FEAT_class</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="dv">0</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">0</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        V <span class="op">=</span> {</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>: <span class="dv">0</span>,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            <span class="dv">2</span>: ASC2 <span class="op">+</span> B_PRICE <span class="op">*</span> database.variables[<span class="st">'price'</span>] <span class="op">+</span> B_FEAT <span class="op">*</span> database.variables[<span class="st">'featured'</span>],</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            <span class="dv">3</span>: ASC3 <span class="op">+</span> B_PRICE <span class="op">*</span> database.variables[<span class="st">'price'</span>] <span class="op">+</span> B_FEAT <span class="op">*</span> database.variables[<span class="st">'featured'</span>],</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>            <span class="dv">4</span>: ASC4 <span class="op">+</span> B_PRICE <span class="op">*</span> database.variables[<span class="st">'price'</span>] <span class="op">+</span> B_FEAT <span class="op">*</span> database.variables[<span class="st">'featured'</span>]</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        logprob <span class="op">=</span> models.loglogit(V, av, database.variables[<span class="st">'product'</span>])</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>        class_utilities.append(logprob)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> k <span class="op">&lt;</span> K:</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>            pi_k <span class="op">=</span> Beta(<span class="ss">f'PI_</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">'</span>, <span class="fl">1.0</span> <span class="op">/</span> K, <span class="fl">0.0001</span>, <span class="fl">0.9999</span>, <span class="dv">0</span>)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            membership_betas.append(pi_k)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> K <span class="op">==</span> <span class="dv">2</span>:</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        PI <span class="op">=</span> [membership_betas[<span class="dv">0</span>], <span class="dv">1</span> <span class="op">-</span> membership_betas[<span class="dv">0</span>]]</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        exp_terms <span class="op">=</span> [exp(beta) <span class="cf">for</span> beta <span class="kw">in</span> membership_betas]</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        denominator <span class="op">=</span> <span class="bu">sum</span>(exp_terms) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        PI <span class="op">=</span> [term <span class="op">/</span> denominator <span class="cf">for</span> term <span class="kw">in</span> exp_terms]</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        PI.append(<span class="dv">1</span> <span class="op">-</span> <span class="bu">sum</span>(PI))</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    loglikelihood <span class="op">=</span> log(<span class="bu">sum</span>([PI[k] <span class="op">*</span> exp(class_utilities[k]) <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K)]))</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    biogeme_model <span class="op">=</span> bio.BIOGEME(database, loglikelihood)</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    biogeme_model.modelName <span class="op">=</span> <span class="ss">f"LC_MNL_</span><span class="sc">{</span>K<span class="sc">}</span><span class="ss">classes"</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> biogeme_model.estimate()</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>        <span class="st">"K"</span>: K,</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        <span class="st">"LogLikelihood"</span>: results.data.logLike,</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">"NumParams"</span>: results.data.nparam,</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">"BIC"</span>: <span class="op">-</span><span class="dv">2</span> <span class="op">*</span> results.data.logLike <span class="op">+</span> results.data.nparam <span class="op">*</span> np.log(df[<span class="st">'id'</span>].nunique()),</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Parameters"</span>: results.get_estimated_parameters()</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="selecting-the-optimal-number-of-latent-classes" class="level3">
+<h3 class="anchored" data-anchor-id="selecting-the-optimal-number-of-latent-classes">Selecting the Optimal Number of Latent Classes</h3>
+<p>A crucial step in estimating Latent Class Multinomial Logit (LC-MNL) models is determining how many latent classes best represent the heterogeneity in the population. Rather than arbitrarily choosing a number of classes, we systematically estimate models with varying class counts—typically 2, 3, 4, and 5—and compare them using a formal model selection criterion.</p>
+</section>
+<section id="model-comparison-using-bic" class="level3">
+<h3 class="anchored" data-anchor-id="model-comparison-using-bic">Model Comparison Using BIC</h3>
+<p>To evaluate and compare the fitted models, we employ the <strong>Bayesian Information Criterion (BIC)</strong>, a widely used metric that balances <strong>goodness-of-fit</strong> with <strong>model complexity</strong>. The BIC for a model is calculated using the formula:</p>
+<p><span class="math display">\[
+BIC = -2 \cdot \ell_n + k \cdot \log(n)
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li>( _n ) is the log-likelihood of the model evaluated at convergence,</li>
+<li>( n ) is the number of observations in the dataset,</li>
+<li>( k ) is the total number of estimated parameters in the model.</li>
+</ul>
+<p>The BIC penalizes models for having a large number of parameters, discouraging overfitting. While models with more classes typically achieve higher log-likelihood values, this improvement must be large enough to offset the BIC penalty incurred by additional complexity.</p>
+</section>
+<section id="interpreting-bic-in-lc-mnl-context" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-bic-in-lc-mnl-context">Interpreting BIC in LC-MNL Context</h3>
+<p>In LC-MNL models, each additional latent class introduces:</p>
+<ul>
+<li>A new set of <strong>class-specific utility parameters</strong> (e.g., price and promotion coefficients),</li>
+<li>An additional <strong>class probability parameter</strong> (subject to a sum-to-one constraint).</li>
+</ul>
+<p>As a result, the parameter count grows quickly with each added class. Although this flexibility may enhance model fit, it can also lead to overfitting, particularly if some latent classes capture noise rather than meaningful segments of behavior.</p>
+<p>The BIC is specifically designed to mitigate this risk. It rewards models that strike a good balance between fit and simplicity. A <strong>lower BIC value indicates a better model</strong>, with the preferred number of classes being the one that minimizes the BIC across all candidate models.</p>
+</section>
+<section id="implementation-strategy" class="level3">
+<h3 class="anchored" data-anchor-id="implementation-strategy">Implementation Strategy</h3>
+<p>The typical workflow for selecting the optimal number of latent classes is as follows:</p>
+<ol type="1">
+<li><strong>Estimate LC-MNL models</strong> for 2, 3, 4, and 5 classes using maximum likelihood estimation.</li>
+<li><strong>Compute BIC</strong> for each model using the formula above.</li>
+<li><strong>Compare BIC values</strong> across models to identify the lowest score.</li>
+<li><strong>Select the model</strong> with the minimum BIC as the optimal latent class solution.</li>
+</ol>
+<p>This procedure provides a principled way to uncover meaningful consumer segments without relying on arbitrary assumptions about how many classes exist.</p>
+<p>The following section will walk through the estimation and comparison process using actual yogurt purchase data.</p>
+<div id="98eef25c" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> K <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">6</span>):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Estimating model for </span><span class="sc">{</span>K<span class="sc">}</span><span class="ss"> classes..."</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> lc_mnl(K, yog_data)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    results.append(res)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">#print(f"Estimated parameters for K = {K}:")</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">#print(res["Parameters"])</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>bic <span class="op">=</span> pd.DataFrame(results).sort_values(by<span class="op">=</span><span class="st">'BIC'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Estimating model for 2 classes...
+Estimating model for 3 classes...
+Estimating model for 4 classes...
+Estimating model for 5 classes...</code></pre>
+</div>
+</div>
+<div id="8d96f49f" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>bic[[<span class="st">'K'</span>, <span class="st">'LogLikelihood'</span>, <span class="st">'NumParams'</span>, <span class="st">'BIC'</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">K</th>
+<th data-quarto-table-cell-role="th">LogLikelihood</th>
+<th data-quarto-table-cell-role="th">NumParams</th>
+<th data-quarto-table-cell-role="th">BIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>5</td>
+<td>-8802.938460</td>
+<td>29</td>
+<td>17831.950671</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>3</td>
+<td>-8941.863060</td>
+<td>17</td>
+<td>18016.252112</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>4</td>
+<td>-9530.346287</td>
+<td>23</td>
+<td>19239.992444</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2</td>
+<td>-10505.614448</td>
+<td>11</td>
+<td>21096.981007</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The model with the lowest BIC is selected as the best-fitting model when balancing accuracy and simplicity. In our results, the 3-class model had the lowest BIC, suggesting that it best explains the data while avoiding unnecessary complexity.</p>
+<section id="comparison-of-aggregate-mnl-vs.-latent-class-mnl-k-3" class="level4">
+<h4 class="anchored" data-anchor-id="comparison-of-aggregate-mnl-vs.-latent-class-mnl-k-3">Comparison of Aggregate MNL vs.&nbsp;Latent-Class MNL (K = 3)</h4>
+<p>Now we compare the parameter estimates between (1) the aggregate MNL, and (2) the latent-class MNL with the number of classes suggested by the BIC.</p>
+<div id="647957bc" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>lc_mnl_3class_params <span class="op">=</span> results[[res[<span class="st">"K"</span>] <span class="cf">for</span> res <span class="kw">in</span> results].index(<span class="dv">3</span>)][<span class="st">"Parameters"</span>].reset_index()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>lc_mnl_3class_params.columns</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>class3_params <span class="op">=</span> lc_mnl_3class_params.loc[lc_mnl_3class_params[<span class="st">'index'</span>].<span class="bu">str</span>.contains(<span class="st">'_class3'</span>)]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Class 3 parameter estimates"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(class3_params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Class 3 parameter estimates
+             index        Value  Active bound  Rob. Std err  Rob. t-test  \
+2      ASC2_class3  -613.795803           0.0     33.813636   -18.152316   
+5      ASC3_class3  -618.348249           0.0     33.824933   -18.280842   
+8      ASC4_class3  -613.052250           0.0     33.813565   -18.130364   
+11   B_FEAT_class3    63.123126           0.0      4.283977    14.734702   
+14  B_PRICE_class3  9820.024161           0.0    537.034352    18.285654   
+
+    Rob. p-value  
+2            0.0  
+5            0.0  
+8            0.0  
+11           0.0  
+14           0.0  </code></pre>
+</div>
+</div>
+</section>
+<section id="price-sensitivity" class="level4">
+<h4 class="anchored" data-anchor-id="price-sensitivity">1. Price Sensitivity</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 24%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Price Coefficient</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Aggregate MNL</td>
+<td>–31.98 (significant)</td>
+<td>Consumers are price-sensitive overall.</td>
+</tr>
+<tr class="even">
+<td>LC-MNL Class 1</td>
+<td>–3317.95 (not significant)</td>
+<td>Very large, likely unstable estimate.</td>
+</tr>
+<tr class="odd">
+<td>LC-MNL Class 2</td>
+<td>–2799.99 (<strong>significant</strong>)</td>
+<td>Very strong price aversion.</td>
+</tr>
+<tr class="even">
+<td>LC-MNL Class 3</td>
+<td>+9820.02 (<strong>significant</strong>)</td>
+<td>Counterintuitive: price increases utility (possible overfitting or perceived quality).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="featured-promotion" class="level4">
+<h4 class="anchored" data-anchor-id="featured-promotion">2. Featured Promotion</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 25%">
+<col style="width: 58%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Featured Coefficient</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Aggregate MNL</td>
+<td>+0.471 (significant)</td>
+<td>Promotion increases likelihood of choice.</td>
+</tr>
+<tr class="even">
+<td>LC-MNL Class 1</td>
+<td>+13.75 (significant)</td>
+<td>Strong positive impact of being featured.</td>
+</tr>
+<tr class="odd">
+<td>LC-MNL Class 2</td>
+<td>+19.73 (significant)</td>
+<td>Even stronger promotional effect.</td>
+</tr>
+<tr class="even">
+<td>LC-MNL Class 3</td>
+<td>–613.79 (significant)</td>
+<td>Strong negative effect — promotions deter choice.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="alternative-specific-constants-ascs" class="level4">
+<h4 class="anchored" data-anchor-id="alternative-specific-constants-ascs">3. Alternative-Specific Constants (ASCs)</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Product</th>
+<th>Aggregate MNL</th>
+<th>LC Class 1</th>
+<th>LC Class 2</th>
+<th>LC Class 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ASC2</td>
+<td>–0.5166</td>
+<td>–1.02</td>
+<td>+280.04</td>
+<td>–613.7</td>
+</tr>
+<tr class="even">
+<td>ASC3</td>
+<td>–4.5584</td>
+<td>+222.88</td>
+<td>+0.86</td>
+<td>–618.34</td>
+</tr>
+<tr class="odd">
+<td>ASC4</td>
+<td>–1.4179</td>
+<td>–2.92</td>
+<td>+279.78</td>
+<td>–613.05</td>
+</tr>
+</tbody>
+</table>
+<p>Interpretation: - LC-MNL reveals stark contrasts between classes. - Class 2 prefers all products highly. - Class 3 strongly disfavors all alternatives — unusual, possibly unstable.</p>
+<hr>
+</section>
+<section id="class-membership-probabilities" class="level4">
+<h4 class="anchored" data-anchor-id="class-membership-probabilities">4. Class Membership Probabilities</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 15%">
+<col style="width: 71%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Class</th>
+<th>Share (PI)</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Class 1</td>
+<td>0.730</td>
+<td>Majority: strong effects for price and promotion.</td>
+</tr>
+<tr class="even">
+<td>Class 2</td>
+<td>0.999</td>
+<td>Possibly absorbing similar behavior as Class 1.</td>
+</tr>
+<tr class="odd">
+<td>Class 3</td>
+<td>~0</td>
+<td>Tiny segment with extreme (and conflicting) effects.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="conclusion-uncovering-preference-heterogeneity-with-lc-mnl" class="level4">
+<h4 class="anchored" data-anchor-id="conclusion-uncovering-preference-heterogeneity-with-lc-mnl"><strong>Conclusion: Uncovering Preference Heterogeneity with LC-MNL</strong></h4>
+<p>The <strong>aggregate Multinomial Logit (MNL)</strong> model offers a reliable and interpretable baseline for understanding consumer choice behavior. It reveals that, on average, consumers display <strong>moderate sensitivity to price</strong> and a <strong>positive response to promotional features</strong>. However, this summary masks the diverse and nuanced preferences that exist across individuals.</p>
+<p>In contrast, the <strong>Latent Class MNL (LC-MNL)</strong> model, particularly with three latent classes, reveals <strong>substantial heterogeneity</strong> in how consumers make trade-offs:</p>
+<ul>
+<li><strong>Class 1</strong> closely mirrors the behavior identified in the aggregate MNL model, representing the “average” or mainstream consumer segment.</li>
+<li><strong>Class 2</strong> exhibits <strong>amplified sensitivity to promotions</strong>, suggesting that these individuals are especially responsive to store advertisements or featured product placements.</li>
+<li><strong>Class 3</strong> demonstrates <strong>atypical behavior</strong>, showing a <strong>negative reaction to promotions</strong> and a <strong>preference for higher-priced options</strong>. This counterintuitive pattern may reflect a niche group of consumers, potential outliers, or issues related to data sparsity and overfitting within that segment.</li>
+</ul>
+<p>These findings underscore the <strong>value of latent class modeling</strong> in surfacing complex and diverse decision-making patterns that a single, population-level model might obscure. However, this added flexibility comes with responsibilities:</p>
+<ul>
+<li><strong>Interpretation must be handled with care</strong>, especially for small or extreme segments where model estimates may be unstable.</li>
+<li>Researchers should ensure that classes are <strong>robust and reproducible</strong>, potentially validating them with external data or follow-up surveys.</li>
+</ul>
+<p>Ultimately, the LC-MNL framework transforms consumer modeling from a one-size-fits-all lens into a <strong>segmentation-driven approach</strong>, offering deeper insights for targeting, pricing strategies, and promotional design.</p>
+<hr>
+</section>
+</section>
+</section>
+<section id="k-nearest-neighbors-knn" class="level2">
+<h2 class="anchored" data-anchor-id="k-nearest-neighbors-knn">K Nearest Neighbors (KNN)</h2>
+<section id="intuition-and-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="intuition-and-workflow">Intuition and Workflow</h3>
+<p>The <strong>K Nearest Neighbors (KNN)</strong> algorithm is a non-parametric, instance-based learning method used for both <strong>classification</strong> and <strong>regression</strong> tasks. It operates on a simple yet powerful premise: <strong>similar observations tend to have similar outcomes</strong>.</p>
+<p>To classify a new observation ( x_{} ), the algorithm follows these steps:</p>
+<ol type="1">
+<li><strong>Compute distances</strong> between ( x_{} ) and all training data points ( x_i ), typically using metrics such as <strong>Euclidean</strong> or <strong>Manhattan</strong> distance.</li>
+<li><strong>Identify the ( k ) nearest neighbors</strong> — that is, the ( k ) training points with the smallest distances to ( x_{} ).</li>
+<li><strong>Determine the majority class</strong> among these neighbors. The most frequent label becomes the predicted class for ( x_{} ).</li>
+</ol>
+<p>This approach is highly intuitive and adaptive. It makes no assumptions about the underlying data distribution, making it well-suited for complex or irregular decision boundaries. However, its performance can be sensitive to:</p>
+<ul>
+<li>The choice of ( k ),</li>
+<li>The scaling of features,</li>
+<li>The presence of irrelevant or noisy variables.</li>
+</ul>
+<p>In the sections that follow, we will apply KNN to classify consumer segments, evaluate performance using cross-validation, and visualize decision boundaries to better understand its behavior in high-dimensional space.</p>
+</section>
+<section id="euclidean-distance-measuring-similarity-in-feature-space" class="level3">
+<h3 class="anchored" data-anchor-id="euclidean-distance-measuring-similarity-in-feature-space">Euclidean Distance: Measuring Similarity in Feature Space</h3>
+<p>At the heart of the K Nearest Neighbors (KNN) algorithm lies the concept of <strong>distance</strong>. To determine how similar two data points are, we often use the <strong>Euclidean distance</strong>, a standard and intuitive metric that corresponds to the straight-line distance between two points in space.</p>
+<p>Given two feature vectors<br>
+( x = (x_1, x_2, , x_d) ) and<br>
+( z = (z_1, z_2, , z_d) ),<br>
+the Euclidean distance between them is computed as:</p>
+<p><span class="math display">\[
+d(x, z) = \sqrt{(x_1 - z_1)^2 + (x_2 - z_2)^2 + \cdots + (x_d - z_d)^2}
+\]</span></p>
+<p>In the special case where each observation lies in two-dimensional space (i.e., two features), the formula simplifies to:</p>
+<p><span class="math display">\[
+d((x_1, x_2), (z_1, z_2)) = \sqrt{(x_1 - z_1)^2 + (x_2 - z_2)^2}
+\]</span></p>
+<p>This distance metric quantifies how “close” two points are in the feature space and directly drives the neighbor selection process in KNN.</p>
+<hr>
+</section>
+<section id="decision-rule-in-knn-classification" class="level3">
+<h3 class="anchored" data-anchor-id="decision-rule-in-knn-classification">Decision Rule in KNN Classification</h3>
+<p>Once the distances are computed, KNN identifies the ( k ) most similar (i.e., nearest) training instances and bases its prediction on their labels. Let ( _k(x) ) represent the set of indices for the ( k ) nearest neighbors of point ( x ). Then the predicted class label ( ) is given by:</p>
+<p><span class="math display">\[
+\hat{y} = \arg\max_{c \in \{0,1\}} \sum_{i \in \mathcal{N}_k(x)} \mathbb{1}(y_i = c)
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li>( (y_i = c) ) is an <strong>indicator function</strong> that returns 1 if neighbor ( i )’s true label is class ( c ), and 0 otherwise.</li>
+<li>The sum counts how many of the ( k ) neighbors belong to class ( c ).</li>
+<li>The predicted class is the one with the highest vote.</li>
+</ul>
+<p>This <strong>majority voting mechanism</strong> is simple yet powerful, especially when decision boundaries are irregular or nonlinear.</p>
+<hr>
+</section>
+<section id="how-to-choose-the-right-value-of-k" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-choose-the-right-value-of-k">How to Choose the Right Value of ( k )</h3>
+<p>The choice of ( k ) significantly impacts the model’s behavior and performance:</p>
+<ul>
+<li><strong>Small values of ( k )</strong> (e.g., ( k = 1 )) can lead to high variance. The model may fit tightly to noise or outliers, resulting in overfitting.</li>
+<li><strong>Larger values of ( k )</strong> lead to smoother decision boundaries by incorporating a broader neighborhood, which may underfit if the class distributions are not well-separated.</li>
+<li><strong>Optimal ( k )</strong> is typically determined using <strong>cross-validation</strong>, where different values of ( k ) are evaluated on held-out data to identify the best-performing option.</li>
+</ul>
+<p>There is no universal best value — it must be tuned based on the dataset and the task at hand.</p>
+<hr>
+</section>
+<section id="practical-walkthrough-knn-on-synthetic-data" class="level3">
+<h3 class="anchored" data-anchor-id="practical-walkthrough-knn-on-synthetic-data">Practical Walkthrough: KNN on Synthetic Data</h3>
+<p>To better understand how KNN operates, we will conduct an illustrative example using a <strong>synthetic dataset</strong>. This controlled setting will help us visualize how KNN makes decisions in a two-dimensional feature space.</p>
+<p>In particular, we will:</p>
+<ol type="1">
+<li><strong>Generate synthetic data</strong> with two continuous features, <code>x1</code> and <code>x2</code>, and a binary response <code>y</code>.</li>
+<li><strong>Define a nonlinear decision boundary</strong>: Class membership will depend on whether a point lies above or below a sinusoidal curve — creating a challenging pattern for classification.</li>
+<li><strong>Implement KNN from scratch</strong>, exploring how the algorithm reacts to different values of ( k ).</li>
+<li><strong>Compare our custom implementation</strong> with built-in classifiers from popular Python libraries.</li>
+<li><strong>Evaluate and visualize performance</strong>, demonstrating how accuracy and boundary flexibility evolve with changes in ( k ).</li>
+</ol>
+<div id="2c3bebf4" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, n)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, n)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>boundary <span class="op">=</span> np.sin(<span class="dv">4</span> <span class="op">*</span> x1) <span class="op">+</span> x1</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> (x2 <span class="op">&gt;</span> boundary).astype(<span class="bu">int</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>random_df <span class="op">=</span> pd.DataFrame({<span class="st">'x1'</span>: x1, <span class="st">'x2'</span>: x2, <span class="st">'y'</span>: y})</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>random_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x1</th>
+<th data-quarto-table-cell-role="th">x2</th>
+<th data-quarto-table-cell-role="th">y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-0.752759</td>
+<td>-2.811425</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2.704286</td>
+<td>0.818462</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1.391964</td>
+<td>-1.113864</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0.591951</td>
+<td>0.051424</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>-2.063888</td>
+<td>2.445399</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">95</td>
+<td>-0.037226</td>
+<td>-0.904743</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">96</td>
+<td>0.136397</td>
+<td>1.355734</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">97</td>
+<td>-0.434754</td>
+<td>2.382662</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">98</td>
+<td>-2.847485</td>
+<td>2.322519</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">99</td>
+<td>-2.352651</td>
+<td>1.679253</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+<p>100 rows × 3 columns</p>
+</div>
+</div>
+</div>
+<p>We can visualize the dataset in 2D, using color to represent the binary class (y). We also overlay the wiggly boundary that separates the two classes.</p>
+<div id="1b229b0c" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">6</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(random_df[<span class="st">'x1'</span>], random_df[<span class="st">'x2'</span>], c<span class="op">=</span>random_df[<span class="st">'y'</span>], cmap<span class="op">=</span><span class="st">'bwr'</span>, edgecolor<span class="op">=</span><span class="st">'k'</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>x_line <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">500</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>boundary_line <span class="op">=</span> np.sin(<span class="dv">4</span> <span class="op">*</span> x_line) <span class="op">+</span> x_line</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>plt.plot(x_line, boundary_line, <span class="st">'k--'</span>, label<span class="op">=</span><span class="st">'Boundary'</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'x1'</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'x2'</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Synthetic Dataset'</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw4_questions_files/figure-html/cell-13-output-1.png" width="662" height="523" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To evaluate the generalization performance of our model, we create a new test dataset using a different random seed. This ensures the test data is independent of the training set.</p>
+<div id="b0d7f9a2" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">19</span>)  <span class="co"># different seed</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>x1_test <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, n)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>x2_test <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, n)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>boundary_test <span class="op">=</span> np.sin(<span class="dv">4</span> <span class="op">*</span> x1_test) <span class="op">+</span> x1_test</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> (x2_test <span class="op">&gt;</span> boundary_test).astype(<span class="bu">int</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> pd.DataFrame({<span class="st">'x1'</span>: x1_test, <span class="st">'x2'</span>: x2_test, <span class="st">'y'</span>: y_test})</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>test_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x1</th>
+<th data-quarto-table-cell-role="th">x2</th>
+<th data-quarto-table-cell-role="th">y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>-2.414798</td>
+<td>1.925009</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1.567498</td>
+<td>1.899944</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>-1.518372</td>
+<td>-1.001426</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>-2.171210</td>
+<td>1.053791</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>-1.011321</td>
+<td>2.900615</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">95</td>
+<td>-1.764803</td>
+<td>-2.503910</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">96</td>
+<td>-1.274871</td>
+<td>-1.705154</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">97</td>
+<td>-0.711182</td>
+<td>1.546217</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">98</td>
+<td>2.011124</td>
+<td>-1.815811</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">99</td>
+<td>-2.507545</td>
+<td>-0.332287</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+<p>100 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="knn-implementation-by-hand-vs-kneighborsclassifier" class="level3">
+<h3 class="anchored" data-anchor-id="knn-implementation-by-hand-vs-kneighborsclassifier">KNN implementation by hand Vs KNeighborsClassifier</h3>
+<p>Here we define a custom KNN classifier using the Euclidean distance between test and training points. For each test instance, the k closest neighbors are selected, and the predicted class is determined by majority vote.</p>
+<div id="7a53307f" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.spatial <span class="im">import</span> distance</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> KNeighborsClassifier</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> knn_predict(X_train, y_train, X_test, k):</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> []</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> test_point <span class="kw">in</span> X_test:</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        dists <span class="op">=</span> [distance.euclidean(test_point, train_point) <span class="cf">for</span> train_point <span class="kw">in</span> X_train]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>        knn_indices <span class="op">=</span> np.argsort(dists)[:k]</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        knn_labels <span class="op">=</span> y_train[knn_indices]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Use np.bincount safely: labels must be integers starting from 0</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If labels are 0 and 1, this is fine</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        majority_vote <span class="op">=</span> np.argmax(np.bincount(knn_labels))</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>        y_pred.append(majority_vote)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(y_pred)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare train and test datasets</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> random_df[[<span class="st">'x1'</span>, <span class="st">'x2'</span>]].values</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> random_df[<span class="st">'y'</span>].values.astype(<span class="bu">int</span>)  <span class="co"># convert to int</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> test_df[[<span class="st">'x1'</span>, <span class="st">'x2'</span>]].values</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> test_df[<span class="st">'y'</span>].values.astype(<span class="bu">int</span>)  <span class="co"># convert to int</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert y arrays to numpy integer arrays if needed</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> np.array(y_train).astype(<span class="bu">int</span>)</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> np.array(y_test).astype(<span class="bu">int</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Built-in KNN classifier</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>clf <span class="op">=</span> KNeighborsClassifier(n_neighbors<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>clf.fit(X_train, y_train)</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>y_lib_pred <span class="op">=</span> clf.predict(X_test)</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Your manual KNN prediction</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>y_hand_pred <span class="op">=</span> knn_predict(X_train, y_train, X_test, k<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare predictions</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Hand-coded KNN accuracy:"</span>, accuracy_score(y_test, y_hand_pred))</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Library KNN accuracy:   "</span>, accuracy_score(y_test, y_lib_pred))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hand-coded KNN accuracy: 0.87
+Library KNN accuracy:    0.87</code></pre>
+</div>
+</div>
+<p>Now we run our custom KNN function across a range of k values (from 1 to 30) to observe how accuracy varies. This helps us identify the optimal value of k that balances underfitting and overfitting.</p>
+<div id="273b764e" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> accuracy_score</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> random_df[[<span class="st">'x1'</span>, <span class="st">'x2'</span>]].values</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> random_df[<span class="st">'y'</span>].values</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> test_df[[<span class="st">'x1'</span>, <span class="st">'x2'</span>]].values</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> test_df[<span class="st">'y'</span>].values</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>accuracies <span class="op">=</span> []</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>):</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    y_pred <span class="op">=</span> knn_predict(X_train, y_train, X_test, k)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    acc <span class="op">=</span> accuracy_score(y_test, y_pred)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    accuracies.append(acc <span class="op">*</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We plot the accuracy of the KNN model as a function of k to visualize the trend and identify the best k value.</p>
+<div id="4a25c761" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">5</span>))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">31</span>), accuracies, marker<span class="op">=</span><span class="st">'o'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'k'</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Accuracy (%)'</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'KNN Accuracy on Test Data'</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>optimal_k <span class="op">=</span> np.argmax(accuracies) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimal k: </span><span class="sc">{</span>optimal_k<span class="sc">}</span><span class="ss"> with accuracy: </span><span class="sc">{</span>accuracies[optimal_k<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hw4_questions_files/figure-html/cell-17-output-1.png" width="659" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimal k: 1 with accuracy: 92.00%</code></pre>
+</div>
+</div>
+</section>
+<section id="interpreting-knn-performance-across-different-values-of-k" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-knn-performance-across-different-values-of-k">Interpreting KNN Performance Across Different Values of ( k )</h3>
+<p>After training the K Nearest Neighbors (KNN) classifier on our synthetic dataset and evaluating test accuracy across a range of ( k ) values, we gain several important insights into how the choice of ( k ) affects model performance.</p>
+<p>Below, we break down the observed trends and provide guidance on selecting an appropriate ( k ) in practice.</p>
+<hr>
+<section id="peak-accuracy-at-k-1" class="level4">
+<h4 class="anchored" data-anchor-id="peak-accuracy-at-k-1">🔹 Peak Accuracy at ( k = 1 )</h4>
+<ul>
+<li>The model achieves its <strong>maximum accuracy of approximately 92%</strong> when ( k = 1 ).</li>
+<li>This is expected because a ( k = 1 ) model makes highly localized decisions, perfectly matching the label of the single closest point in the training set.</li>
+<li>While this results in excellent performance on the test set here, it may not generalize well in noisier or more complex real-world datasets.</li>
+</ul>
+<hr>
+</section>
+<section id="rapid-drop-in-accuracy-from-k-2-to-k-4" class="level4">
+<h4 class="anchored" data-anchor-id="rapid-drop-in-accuracy-from-k-2-to-k-4">🔹 Rapid Drop in Accuracy from ( k = 2 ) to ( k = 4 )</h4>
+<ul>
+<li>As ( k ) increases slightly, accuracy <strong>declines sharply to the 86–87% range</strong>.</li>
+<li>This drop illustrates how increasing ( k ) reduces model variance but introduces some bias — the predictions become less sensitive to local variations in the data.</li>
+<li>The sudden dip suggests that the dataset includes decision boundaries that are non-linear and locally irregular.</li>
+</ul>
+<hr>
+</section>
+<section id="unstable-region-k-5-to-k-15" class="level4">
+<h4 class="anchored" data-anchor-id="unstable-region-k-5-to-k-15">🔹 Unstable Region: ( k = 5 ) to ( k = 15 )</h4>
+<ul>
+<li>In this intermediate zone, <strong>accuracy fluctuates without a clear trend</strong>.</li>
+<li>The model is likely struggling to balance competing effects: higher ( k ) smooths decision boundaries, but the data may not support a consistently simple structure.</li>
+<li>These fluctuations imply the presence of subtle patterns that are hard to capture consistently with medium-sized neighborhoods.</li>
+</ul>
+<hr>
+</section>
+<section id="accuracy-plateau-beyond-k" class="level4">
+<h4 class="anchored" data-anchor-id="accuracy-plateau-beyond-k">🔹 Accuracy Plateau Beyond ( k )</h4>
+<ul>
+<li>For ( k ) values of 15 and above, <strong>accuracy levels off around 85–86%</strong>.</li>
+<li>This flattening indicates that the model is becoming overly generalized — class predictions are based on increasingly broad neighborhoods, leading to <strong>underfitting</strong>.</li>
+<li>The model loses sensitivity to the complex, nonlinear boundary in the data and instead produces overly smoothed predictions.</li>
+</ul>
+<hr>
+</section>
+<section id="striking-a-balance-accuracy-vs.-generalization" class="level4">
+<h4 class="anchored" data-anchor-id="striking-a-balance-accuracy-vs.-generalization">🔹 Striking a Balance: Accuracy vs.&nbsp;Generalization</h4>
+<ul>
+<li>Although ( k = 1 ) provides the <strong>highest accuracy</strong>, it is also the most prone to <strong>overfitting</strong>, especially in real-world applications with noise.</li>
+<li>A more balanced choice is to use a <strong>moderately small ( k ), such as 3 or 5</strong>, which still offers high accuracy while improving robustness to outliers.</li>
+<li>This results in a <strong>better bias-variance trade-off</strong>, essential for reliable generalization to unseen data.</li>
+</ul>
+<hr>
+</section>
+<section id="summary-of-insights" class="level4">
+<h4 class="anchored" data-anchor-id="summary-of-insights">🔸 Summary of Insights</h4>
+<ul>
+<li><p><strong>Best test accuracy</strong>:<br>
+( ), achieving ~92%</p></li>
+<li><p><strong>Recommended practical range</strong>:<br>
+( ) to ( ) for improved generalization and reduced risk of overfitting</p></li>
+<li><p><strong>Stability zone</strong>:<br>
+Accuracy flattens around 85–86% for ( k ), signaling underfitting</p></li>
+</ul>
+<p>Choosing the right ( k ) is dataset-dependent, and validation techniques such as <strong>cross-validation</strong> should be used to identify the optimal choice in real-world applications.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

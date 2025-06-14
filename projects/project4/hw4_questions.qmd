@@ -151,10 +151,38 @@ Where:
 ### Python Implementation
 
 Below, we present the Python code that performs these steps—generating one-hot encoded product variables and merging them with the dataset. This prepares the data for estimation using a discrete choice modeling package such as `statsmodels.discrete.discrete_model.MNLogit` or `pylogit`.
+```{python}
+import statsmodels.api as sm
+from sklearn.preprocessing import OneHotEncoder
+
+encoder = OneHotEncoder(drop='first', sparse_output=False)
+product_dummies = encoder.fit_transform(yog_data[['product']])
+
+# Create DataFrame with appropriate column names
+product_dummies_df = pd.DataFrame(product_dummies, columns=encoder.get_feature_names_out())
+
+# Merge dummies with main data
+yog_data = pd.concat([yog_data.reset_index(drop=True), product_dummies_df.reset_index(drop=True)], axis=1)
+product_dummies_df
+
+# Define independent variables (price, featured, and ASCs)
+X = yog_data[['price', 'featured'] + list(product_dummies_df.columns)]
+X = sm.add_constant(X)  # Add intercept
+X
+
+```
+The independent variables for the model includes:
+
+- price: price per ounce
+
+- featured: whether the product was promoted
+
+- product_2, product_3, product_4: dummy variables representing ASCs for products 2, 3, and 4 (product 1 is the reference)
+
 
 ```{python}
 # Dependent variable: whether the product was chosen (1 if chosen, 0 otherwise)
-target = yogurt_data['chosen']
+target = yog_data['chosen']
 target
 ```
 The above data is our dependent variable.
@@ -290,7 +318,7 @@ The following section will walk through the estimation and comparison process us
 results = []
 for K in range(2, 6):
     print(f"Estimating model for {K} classes...")
-    res = lc_mnl(K, yogurt_data)
+    res = lc_mnl(K, yog_data)
     results.append(res)
     #print(f"Estimated parameters for K = {K}:")
     #print(res["Parameters"])
@@ -309,7 +337,7 @@ The model with the lowest BIC is selected as the best-fitting model when balanci
 Now we compare the parameter estimates between (1) the aggregate MNL, and (2) the latent-class MNL with the number of classes suggested by the BIC.
 
 ```{python}
-lc_mnl_3class_params = results[[res["K"] for res in results_list].index(3)]["Parameters"].reset_index()
+lc_mnl_3class_params = results[[res["K"] for res in results].index(3)]["Parameters"].reset_index()
 lc_mnl_3class_params.columns
 class3_params = lc_mnl_3class_params.loc[lc_mnl_3class_params['index'].str.contains('_class3')]
 print("Class 3 parameter estimates")
@@ -539,8 +567,8 @@ def knn_predict(X_train, y_train, X_test, k):
     return np.array(y_pred)
 
 # Prepare train and test datasets
-X_train = df[['x1', 'x2']].values
-y_train = df['y'].values.astype(int)  # convert to int
+X_train = random_df[['x1', 'x2']].values
+y_train = random_df['y'].values.astype(int)  # convert to int
 X_test = test_df[['x1', 'x2']].values
 y_test = test_df['y'].values.astype(int)  # convert to int
 
@@ -568,8 +596,8 @@ Now we run our custom KNN function across a range of k values (from 1 to 30) to 
 ```{python}
 from sklearn.metrics import accuracy_score
 
-X_train = df[['x1', 'x2']].values
-y_train = df['y'].values
+X_train = random_df[['x1', 'x2']].values
+y_train = random_df['y'].values
 X_test = test_df[['x1', 'x2']].values
 y_test = test_df['y'].values
 
